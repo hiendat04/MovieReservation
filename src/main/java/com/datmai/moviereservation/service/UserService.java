@@ -41,6 +41,7 @@ public class UserService {
             res.setAge(user.getAge());
             res.setCreatedAt(user.getCreatedAt());
             res.setCreatedBy(user.getCreatedBy());
+            res.setEmail(user.getEmail());
             res.setGender(user.getGender());
             res.setId(user.getId());
         }
@@ -129,5 +130,23 @@ public class UserService {
 
     public void deleteUser(long id){
         this.userRepository.deleteById(id);
+    }
+
+    public User fetchUserByEmail(String email){
+        return this.userRepository.findByEmail(email);
+    }
+
+    public void updateUserToken(String token, String email){
+        // Fetch current user
+        User user = this.fetchUserByEmail(email);
+        if(user != null){
+            user.setRefreshToken(token);
+            // Update token
+            user = this.createUser(user);
+        }
+    }
+
+    public User getUserByRefreshTokenAndEmail(String refreshToken, String email){
+        return this.userRepository.findByRefreshTokenAndEmail(refreshToken, email);
     }
 }

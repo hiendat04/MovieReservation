@@ -12,6 +12,7 @@ import lombok.Setter;
 public class ResCreateUserDTO {
     
     private long id;
+    private String email;
     private GenderEnum gender;
     private String name;
     private long age;
