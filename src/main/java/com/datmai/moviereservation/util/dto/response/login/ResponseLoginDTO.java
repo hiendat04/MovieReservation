@@ -8,8 +8,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ResponseLoginDTO {
-    private String accessToken;
     private UserLogin user;
+    private String accessToken;
 
     @Getter
     @Setter

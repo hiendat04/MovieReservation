@@ -19,6 +19,8 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenAuthenticationEntryPoint;
+import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
@@ -27,7 +29,7 @@ import com.nimbusds.jose.util.Base64;
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
 public class SecurityConfiguration {
-       // Get key from env file
+    // Get key from env file
     @Value("${hiendat.jwt.base64-secret}")
     private String jwtKey;
 
@@ -46,7 +48,7 @@ public class SecurityConfiguration {
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register"
         };
         http
-                .csrf(c -> c.disable()) 
+                .csrf(c -> c.disable())
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(
                         authz -> authz
@@ -56,17 +58,14 @@ public class SecurityConfiguration {
                                                                                         // BearerTokenAuthenticationFilter
                                                                                         // and this filter will extract
                                                                                         // the Bearer Token (sent from
-                                                                                        // client) automatically, we use
-                                                                                        // oauth to scale our project in the future so
+                                                                                        // client) automatically to
+                                                                                        // start authenticating, we use
+                                                                                        // oauth to scale our project in
+                                                                                        // the future so
                                                                                         // that server can communicate
                                                                                         // with many services out there
-                                                                                        // (Frontend, Server, Fb, Gg
-                                                                                        // ...)
+                                                                                        // (Frontend, Server, FB, GG...)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
-                // .exceptionHandling(
-                // exceptions -> exceptions
-                // .authenticationEntryPoint(new BearerTokenAuthenticationEntryPoint()) // 401
-                // .accessDeniedHandler(new BearerTokenAccessDeniedHandler())) // 403
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
@@ -90,7 +89,8 @@ public class SecurityConfiguration {
         return jwtAuthenticationConverter;
     }
 
-    // This function will run first whenever there is a request from client to server
+    // This function will run first whenever there is a request from client to
+    // server
     @Bean
     public JwtDecoder jwtDecoder() {
         NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder.withSecretKey(

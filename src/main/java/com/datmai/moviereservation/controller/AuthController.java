@@ -56,7 +56,7 @@ public class AuthController {
     @PostMapping("/auth/login")
     @ApiMessage("User login")
     public ResponseEntity<ResponseLoginDTO> login(@Valid @RequestBody RequestLoginDTO loginDTO) {
-        
+
         // Send username and password to Security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getEmail(), loginDTO.getPassword());
@@ -182,13 +182,13 @@ public class AuthController {
     }
 
     @PostMapping("/auth/logout")
-    @ApiMessage("User logout")
+    @ApiMessage("Logout successfully")
     public ResponseEntity<Void> logout() throws ExistingException {
         // Get the email of current user
         String email = SecurityUtil.getCurrentUserLogin().get();
 
         if (email.equals(null)) {
-            throw new ExistingException("Access token is invalid");
+            throw new ExistingException("Access  token is invalid");
         }
 
         // Set refresh cookie = null
@@ -197,16 +197,20 @@ public class AuthController {
         // Delete refresh token in cookie
         ResponseCookie deleteCookie = ResponseCookie
                 .from("refresh_token", null)
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
                 .maxAge(0)
                 .build();
 
         return ResponseEntity
                 .ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
-                .build();
+                .body(null);
     }
 
     @PostMapping("/auth/register")
+    @ApiMessage("Register successfully")
     public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws ExistingException {
 
         // Check if email exist
