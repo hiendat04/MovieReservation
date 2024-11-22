@@ -38,6 +38,11 @@ public class Ticket {
     @JoinColumn(name = "seat_id")
     private Seat seat;
 
+    // Many To One -> Movie
+    @ManyToOne
+    @JoinColumn(name = "movie_id")
+    private Movie movie;
+
     // Many To One -> Schedule
     @ManyToOne
     @JoinColumn(name = "schedule_id")

@@ -18,6 +18,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -34,11 +35,10 @@ public class Movie {
     @NotBlank(message = "Movie name cannot be empty")
     private String name;
 
-    @NotBlank(message = "Movie genre cannot be blank")
     @Enumerated(EnumType.STRING)
     private MovieGenre genre;
 
-    @NotBlank(message = "Duration cannot be blank")
+    @NotNull(message = "Duration cannot be empty")
     private int duration;
 
     @NotBlank(message = "Country cannot be blank")
@@ -59,6 +59,10 @@ public class Movie {
     // One To Many -> Schedule
     @OneToMany(mappedBy = "movie")
     private List<Schedule> schedules;
+
+    // One To Many -> Ticket    
+    @OneToMany(mappedBy = "movie")
+    private List<Ticket> tickets;
 
     private Instant createdAt;
     private Instant updatedAt;

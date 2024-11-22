@@ -41,7 +41,7 @@ public class Schedule {
     @JoinColumn(name = "screen_id")
     private Screen screen;
 
-    // Many To One
+    // Many To One > Movie
     @ManyToOne
     @JoinColumn(name = "movie_id")
     private Movie movie;
