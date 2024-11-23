@@ -1,9 +1,11 @@
 package com.datmai.moviereservation.domain;
 
-import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 import com.datmai.moviereservation.util.constant.ScreenFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -31,7 +33,8 @@ public class Schedule {
     private long id;
 
     @NotBlank(message = "Show time cannot be empty")
-    private Instant showTime;
+    @JsonFormat(pattern = "dd-MM-yyyy")
+    private LocalDate date;
 
     @Enumerated(EnumType.STRING)
     private ScreenFormat format;
@@ -49,4 +52,8 @@ public class Schedule {
     // One To Many -> Ticket
     @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
     private List<Ticket> tickets;
+
+    // One To Many -> ShowTime
+    @OneToMany(mappedBy = "schedule", fetch = FetchType.LAZY)
+    private List<ShowTime> showTimes;
 }

@@ -34,6 +34,8 @@ public class Movie {
 
     @NotBlank(message = "Movie name cannot be empty")
     private String name;
+    
+    private String poster;
 
     @Enumerated(EnumType.STRING)
     private MovieGenre genre;
