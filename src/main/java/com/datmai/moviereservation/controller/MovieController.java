@@ -8,10 +8,8 @@ import com.datmai.moviereservation.service.MovieService;
 import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
 import com.datmai.moviereservation.util.error.ExistingException;
 import com.datmai.moviereservation.util.format.ApiMessage;
-import com.datmai.moviereservation.util.format.RestResponse;
 import com.turkraft.springfilter.boot.Filter;
 
-import io.micrometer.core.ipc.http.HttpSender.Response;
 import jakarta.validation.Valid;
 
 import org.springframework.data.domain.Pageable;
@@ -24,7 +22,6 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/v1")

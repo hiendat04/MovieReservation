@@ -1,9 +1,12 @@
 package com.datmai.moviereservation.domain;
 
+import java.time.Instant;
+
 import org.hibernate.validator.constraints.Range;
 
 import com.datmai.moviereservation.util.constant.SeatRow;
 import com.datmai.moviereservation.util.constant.SeatStatus;
+import com.datmai.moviereservation.util.security.SecurityUtil;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -16,6 +19,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -41,6 +46,27 @@ public class Seat {
 
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
+
+    private Instant createdAt;
+    private String createdBy;
+    private Instant updatedAt;
+    private String updatedBy;
+
+    @PrePersist
+    public void handleBeforeCreate() {
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        this.updatedAt = Instant.now();
+    }
 
     // Many To One -> Screen
     @ManyToOne

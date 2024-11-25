@@ -1,6 +1,8 @@
 package com.datmai.moviereservation.util.dto.response.pagination;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -11,6 +13,8 @@ public class ResultPaginationDTO {
 
     @Getter
     @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class Meta {
         private int currentPage;
         private int pageSize;

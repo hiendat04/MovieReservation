@@ -6,10 +6,15 @@ import java.util.List;
 import com.datmai.moviereservation.util.constant.MovieAge;
 import com.datmai.moviereservation.util.constant.MovieGenre;
 import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -34,7 +39,7 @@ public class Movie {
 
     @NotBlank(message = "Movie name cannot be empty")
     private String name;
-    
+
     private String poster;
 
     @Enumerated(EnumType.STRING)
@@ -59,10 +64,10 @@ public class Movie {
     private List<String> actors;
 
     // One To Many -> Schedule
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 
-    // One To Many -> Ticket    
+    // One To Many -> Ticket
     @OneToMany(mappedBy = "movie")
     private List<Ticket> tickets;
 
