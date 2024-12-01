@@ -16,6 +16,7 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -29,7 +30,7 @@ public class ShowTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank(message = "Show time cannot be empty")
+    @NotNull(message = "Show time cannot be empty")
     @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime time; // Only the time
 
@@ -37,6 +38,11 @@ public class ShowTime {
     private String createdBy;
     private Instant updatedAt;
     private String updatedBy;
+
+    //Many To One -> Schedule
+    @ManyToOne
+    @JoinColumn(name = "schedule_id")
+    private Schedule schedule; 
 
     @PrePersist
     public void handleBeforeCreate() {
@@ -54,7 +60,4 @@ public class ShowTime {
         this.updatedAt = Instant.now();
     }
 
-    @ManyToOne
-    @JoinColumn(name = "schedule_id")
-    private Schedule schedule;
 }
