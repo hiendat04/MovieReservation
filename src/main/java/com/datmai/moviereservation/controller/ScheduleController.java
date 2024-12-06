@@ -60,8 +60,7 @@ public class ScheduleController {
         }
 
         // Check if schedule exist
-        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate(),
-                schedule.getFormat())) {
+        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
             throw new ExistingException("Schedule already exist");
         }
 
@@ -83,8 +82,7 @@ public class ScheduleController {
         }
 
         // Check if schedule exist
-        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate(),
-                schedule.getFormat())) {
+        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
             throw new ExistingException("Schedule already exist");
         }
 

@@ -35,13 +35,12 @@ public class ScheduleService {
         this.screenService = screenService;
     }
 
-    public boolean isScheduleExist(Screen screen, Movie movie, LocalDate date, ScreenFormat format) {
-        return this.scheduleRepository.existsByScreenAndMovieAndDateAndFormat(screen, movie, date, format);
+    public boolean isScheduleExist(Screen screen, Movie movie, LocalDate date) {
+        return this.scheduleRepository.existsByScreenAndMovieAndDate(screen, movie, date);
     }
 
     public Schedule createSchedule(Schedule schedule) {
-        if (!this.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate(),
-                schedule.getFormat())) {
+        if (!this.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
             return this.scheduleRepository.save(schedule);
         }
         return null;
@@ -54,7 +53,6 @@ public class ScheduleService {
         CreateScheduleDTO res = new CreateScheduleDTO(
                 schedule.getId(),
                 schedule.getDate(),
-                schedule.getFormat(),
                 schedule.getCreatedAt(),
                 schedule.getCreatedBy(),
                 new CreateScheduleDTO.ScheduleScreen(schedule.getScreen().getId(), screen.getName()),
@@ -73,7 +71,6 @@ public class ScheduleService {
         Schedule currentSchedule = this.fetchScheduleById(schedule.getId());
         if (currentSchedule != null) {
             currentSchedule.setDate(schedule.getDate());
-            currentSchedule.setFormat(schedule.getFormat());
             currentSchedule.setMovie(schedule.getMovie());
             currentSchedule.setScreen(schedule.getScreen());
 
@@ -88,7 +85,6 @@ public class ScheduleService {
         UpdateScheduleDTO res = new UpdateScheduleDTO(
                 schedule.getId(),
                 schedule.getDate(),
-                schedule.getFormat(),
                 schedule.getUpdatedAt(),
                 schedule.getUpdatedBy(),
                 new UpdateScheduleDTO.ScheduleScreen(schedule.getScreen().getId(), screen.getName()),
@@ -100,7 +96,6 @@ public class ScheduleService {
     public FetchScheduleDTO convertFetchScheduleDTO(Schedule schedule) {
         FetchScheduleDTO res = new FetchScheduleDTO(
                 schedule.getDate(),
-                schedule.getFormat(),
                 new FetchScheduleDTO.ScheduleMovie(schedule.getMovie().getId(), schedule.getMovie().getName(),
                         schedule.getMovie().getPoster(), schedule.getMovie().getGenre()),
                 new FetchScheduleDTO.ScheduleScreen(schedule.getScreen().getId(), schedule.getScreen().getName()));
@@ -115,7 +110,6 @@ public class ScheduleService {
                 schedule -> {
                     FetchScheduleDTO result = new FetchScheduleDTO(
                             schedule.getDate(),
-                            schedule.getFormat(),
                             new FetchScheduleDTO.ScheduleMovie(schedule.getMovie().getId(),
                                     schedule.getMovie().getName(), schedule.getMovie().getPoster(),
                                     schedule.getMovie().getGenre()),
@@ -135,7 +129,7 @@ public class ScheduleService {
         return res;
     }
 
-    public void deleteById(long id){
+    public void deleteById(long id) {
         this.scheduleRepository.deleteById(id);
     }
 }

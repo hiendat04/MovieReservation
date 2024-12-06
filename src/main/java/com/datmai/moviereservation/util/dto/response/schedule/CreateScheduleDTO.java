@@ -19,7 +19,6 @@ import lombok.Setter;
 public class CreateScheduleDTO {
     private long id;
     private LocalDate date;
-    private ScreenFormat format;
     private Instant createdAt;
     private String createdBy;
     private ScheduleScreen screen;

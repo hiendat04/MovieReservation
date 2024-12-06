@@ -3,6 +3,7 @@ package com.datmai.moviereservation.domain;
 import java.time.Instant;
 import java.util.List;
 
+import com.datmai.moviereservation.util.constant.ScreenFormat;
 import com.datmai.moviereservation.util.constant.ScreenName;
 import com.datmai.moviereservation.util.security.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
@@ -37,6 +38,9 @@ public class Screen {
 
     @Enumerated(EnumType.STRING)
     private ScreenName name;
+
+    @Enumerated(EnumType.STRING)
+    private ScreenFormat format;
 
     private Instant createdAt;
     private String createdBy;

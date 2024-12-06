@@ -46,9 +46,6 @@ public class Schedule {
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate date;
 
-    @Enumerated(EnumType.STRING)
-    private ScreenFormat format;
-
     private Instant createdAt;
     private String createdBy;
     private Instant updatedAt;

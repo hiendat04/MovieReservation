@@ -17,7 +17,6 @@ import lombok.Setter;
 @AllArgsConstructor
 public class FetchScheduleDTO {
     private LocalDate date;
-    private ScreenFormat format;
     private ScheduleMovie movie;
     private ScheduleScreen screen;
 

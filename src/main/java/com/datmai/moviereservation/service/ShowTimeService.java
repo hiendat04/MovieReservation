@@ -75,7 +75,7 @@ public class ShowTimeService {
         Movie movie = this.movieService.fetchMovieById(schedule.getMovie().getId());
         Screen screen = this.screenService.fetchScreenById(schedule.getScreen().getId());
 
-        FetchScheduleDTO scheduleDTO = new FetchScheduleDTO(schedule.getDate(), schedule.getFormat(),
+        FetchScheduleDTO scheduleDTO = new FetchScheduleDTO(schedule.getDate(),
                 new FetchScheduleDTO.ScheduleMovie(movie.getId(), movie.getName(), movie.getPoster(), movie.getGenre()),
                 new FetchScheduleDTO.ScheduleScreen(screen.getId(), screen.getName()));
 
