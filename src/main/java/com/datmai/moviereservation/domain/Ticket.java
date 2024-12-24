@@ -2,6 +2,7 @@ package com.datmai.moviereservation.domain;
 
 import java.time.Instant;
 
+import com.datmai.moviereservation.service.ScheduleService;
 import com.datmai.moviereservation.util.security.SecurityUtil;
 
 import jakarta.persistence.Entity;
@@ -12,6 +13,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.PreUpdate;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -27,21 +29,17 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @NotBlank(message = "Price cannot be blank")
     private double price;
 
-    private Instant boughtAt;
-    private String boughtBy;
+    private Instant createdAt;
+    private String createdBy;
+    private Instant updatedAt;
+    private String updatedBy;
 
     // One To One -> Seat
     @OneToOne
     @JoinColumn(name = "seat_id")
     private Seat seat;
-
-    // Many To One -> Movie
-    @ManyToOne
-    @JoinColumn(name = "movie_id")
-    private Movie movie;
 
     // Many To One -> Schedule
     @ManyToOne
@@ -49,15 +47,23 @@ public class Ticket {
     private Schedule schedule;
 
     // Many To One -> User
-    @ManyToOne
+    @ManyToOne(optional = true)
     @JoinColumn(name = "user_id")
     private User user;
 
     @PrePersist
     public void handleBeforeCreate() {
-        this.boughtBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
-        this.boughtAt = Instant.now();
+        this.createdAt = Instant.now();
+    }
+
+    @PreUpdate
+    public void handleBeforeUpdate() {
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+                ? SecurityUtil.getCurrentUserLogin().get()
+                : "";
+        this.updatedAt = Instant.now();
     }
 }

@@ -64,10 +64,6 @@ public class Movie {
     @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
     private List<Schedule> schedules;
 
-    // One To Many -> Ticket
-    @OneToMany(mappedBy = "movie")
-    private List<Ticket> tickets;
-
     private Instant createdAt;
     private Instant updatedAt;
     private String createdBy;

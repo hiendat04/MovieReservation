@@ -49,7 +49,6 @@ public class MovieService {
             currentMovie.setGenre(requestMovie.getGenre());
             currentMovie.setSchedules(requestMovie.getSchedules());
             currentMovie.setSubtitle(requestMovie.getSubtitle());
-            currentMovie.setTickets(requestMovie.getTickets());
 
             currentMovie = this.createMovie(currentMovie);
         }

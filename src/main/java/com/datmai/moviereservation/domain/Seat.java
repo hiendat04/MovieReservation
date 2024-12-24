@@ -2,9 +2,6 @@ package com.datmai.moviereservation.domain;
 
 import java.time.Instant;
 
-import org.hibernate.validator.constraints.Range;
-
-import com.datmai.moviereservation.util.constant.SeatRow;
 import com.datmai.moviereservation.util.constant.SeatStatus;
 import com.datmai.moviereservation.util.security.SecurityUtil;
 
@@ -30,19 +27,12 @@ import lombok.Setter;
 @Entity
 @Table(name = "seats")
 public class Seat {
-    private static final int MIN_RANGE = 1;
-
-    private static final int MAX_RANGE = 10;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "seat_row")
-    private SeatRow row;
-
-    @Range(min = MIN_RANGE, max = MAX_RANGE)
-    private int number;
+    @Column(name = "seat_identifier", unique = true, nullable = false)
+    private String seatIdentifier;
 
     @Enumerated(EnumType.STRING)
     private SeatStatus status;

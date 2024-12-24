@@ -6,11 +6,6 @@ import java.util.List;
 import com.datmai.moviereservation.util.constant.ScreenFormat;
 import com.datmai.moviereservation.util.constant.ScreenName;
 import com.datmai.moviereservation.util.security.SecurityUtil;
-import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

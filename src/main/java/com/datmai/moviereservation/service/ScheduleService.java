@@ -13,16 +13,12 @@ import com.datmai.moviereservation.domain.Movie;
 import com.datmai.moviereservation.domain.Schedule;
 import com.datmai.moviereservation.domain.Screen;
 import com.datmai.moviereservation.repository.ScheduleRepository;
-import com.datmai.moviereservation.util.constant.ScreenFormat;
 import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
 import com.datmai.moviereservation.util.dto.response.schedule.CreateScheduleDTO;
 import com.datmai.moviereservation.util.dto.response.schedule.FetchScheduleDTO;
 import com.datmai.moviereservation.util.dto.response.schedule.UpdateScheduleDTO;
 
-import jakarta.transaction.Transactional;
-
 @Service
-@Transactional
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final MovieService movieService;
