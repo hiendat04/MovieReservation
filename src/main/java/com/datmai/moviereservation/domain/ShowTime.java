@@ -3,7 +3,7 @@ package com.datmai.moviereservation.domain;
 import java.time.Instant;
 import java.time.LocalTime;
 
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;

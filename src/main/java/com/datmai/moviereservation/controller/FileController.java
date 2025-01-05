@@ -1,14 +1,16 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.datmai.moviereservation.service.FileService;
-import com.datmai.moviereservation.util.dto.file.ResUploadFileDTO;
-import com.datmai.moviereservation.util.error.FileUploadException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.dto.file.ResUploadFileDTO;
+import com.datmai.moviereservation.exception.FileUploadException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,12 +24,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "File Controller")
 public class FileController {
     private final FileService fileService;
 
-    public FileController(FileService fileService) {
-        this.fileService = fileService;
-    }
 
     // Get env variable
     @Value("${hiendat.upload-file.base-uri}")

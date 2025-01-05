@@ -3,9 +3,9 @@ package com.datmai.moviereservation.domain;
 import java.time.Instant;
 import java.util.List;
 
-import com.datmai.moviereservation.util.constant.MovieAge;
-import com.datmai.moviereservation.util.constant.MovieGenre;
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.constant.MovieAge;
+import com.datmai.moviereservation.common.constant.MovieGenre;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

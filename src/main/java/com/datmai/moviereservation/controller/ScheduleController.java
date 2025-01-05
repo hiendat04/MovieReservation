@@ -1,5 +1,7 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -7,12 +9,12 @@ import com.datmai.moviereservation.domain.Schedule;
 import com.datmai.moviereservation.service.MovieService;
 import com.datmai.moviereservation.service.ScheduleService;
 import com.datmai.moviereservation.service.ScreenService;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.CreateScheduleDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.FetchScheduleDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.UpdateScheduleDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.schedule.CreateScheduleDTO;
+import com.datmai.moviereservation.common.dto.response.schedule.FetchScheduleDTO;
+import com.datmai.moviereservation.common.dto.response.schedule.UpdateScheduleDTO;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
@@ -30,20 +32,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "Schedule Controller")
 public class ScheduleController {
 
     private final ScheduleService scheduleService;
     private final MovieService movieService;
     private final ScreenService screenService;
-
-    public ScheduleController(
-            ScheduleService scheduleService,
-            MovieService movieService,
-            ScreenService screenService) {
-        this.scheduleService = scheduleService;
-        this.movieService = movieService;
-        this.screenService = screenService;
-    }
 
     @PostMapping("/schedules")
     public ResponseEntity<CreateScheduleDTO> createSchedule(@Valid @RequestBody Schedule schedule)

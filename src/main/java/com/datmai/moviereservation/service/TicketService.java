@@ -1,13 +1,17 @@
 package com.datmai.moviereservation.service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.datmai.moviereservation.domain.Schedule;
 import com.datmai.moviereservation.domain.Seat;
 import com.datmai.moviereservation.domain.Ticket;
 import com.datmai.moviereservation.repository.TicketRepository;
-import com.datmai.moviereservation.util.constant.SeatStatus;
-import com.datmai.moviereservation.util.dto.response.ticket.TicketDTO;
+import com.datmai.moviereservation.common.constant.SeatStatus;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.ticket.TicketDTO;
 
 @Service
 public class TicketService {
@@ -43,6 +47,27 @@ public class TicketService {
         return this.ticketRepository.existsByScheduleAndSeat(schedule, seat);
     }
 
+    public boolean isTicketIdExist(long id) {
+        return this.ticketRepository.existsById(id);
+    }
+
+    public Ticket fetchTicketById(long id) {
+        return this.ticketRepository.findById(id) != null ? this.ticketRepository.findById(id).get() : null;
+    }
+
+    public TicketDTO updateTicket(Ticket ticket) {
+        Ticket currentTicket = this.fetchTicketById(ticket.getId());
+        if (currentTicket != null) {
+            currentTicket.setSchedule(ticket.getSchedule());
+            currentTicket.setSeat(ticket.getSeat());
+            currentTicket.setUser(ticket.getUser());
+
+            // Save updated ticket
+            currentTicket = this.ticketRepository.save(currentTicket);
+        }
+        return this.convertTicketDTO(currentTicket);
+    }
+
     public TicketDTO convertTicketDTO(Ticket ticket) {
         // Fetch related schedule and seat
         Schedule schedule = this.scheduleService.fetchScheduleById(ticket.getSchedule().getId());
@@ -54,6 +79,27 @@ public class TicketService {
                 this.scheduleService.convertFetchScheduleDTO(schedule));
 
         return res;
+    }
+
+    public ResultPaginationDTO fetchAllTickets(Specification<Ticket> specification, Pageable pageable) {
+        Page<Ticket> ticketPage = this.ticketRepository.findAll(specification, pageable);
+        ResultPaginationDTO.Meta meta = new ResultPaginationDTO.Meta(
+                ticketPage.getNumber(),
+                ticketPage.getSize(),
+                ticketPage.getTotalPages(),
+                ticketPage.getTotalElements());
+
+        ResultPaginationDTO allTickets = new ResultPaginationDTO(
+                meta,
+                ticketPage.getContent().stream().map(ticket -> {
+                    return this.convertTicketDTO(ticket);
+                }));
+
+        return allTickets;
+    }
+
+    public void deleteTicket(long id) {
+        this.ticketRepository.deleteById(id);
     }
 
 }

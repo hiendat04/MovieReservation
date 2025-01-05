@@ -3,9 +3,9 @@ package com.datmai.moviereservation.domain;
 import java.time.Instant;
 import java.util.List;
 
-import com.datmai.moviereservation.util.constant.ScreenFormat;
-import com.datmai.moviereservation.util.constant.ScreenName;
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.constant.ScreenFormat;
+import com.datmai.moviereservation.common.constant.ScreenName;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;

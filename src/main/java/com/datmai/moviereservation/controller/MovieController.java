@@ -1,13 +1,15 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.datmai.moviereservation.domain.Movie;
 import com.datmai.moviereservation.service.MovieService;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
@@ -25,13 +27,12 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "Movie Controller")
 public class MovieController {
 
     private final MovieService movieService;
 
-    public MovieController(MovieService movieService) {
-        this.movieService = movieService;
-    }
 
     @PostMapping("/movies")
     @ApiMessage("Create movie successfully")

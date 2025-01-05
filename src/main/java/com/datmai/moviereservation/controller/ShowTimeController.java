@@ -1,14 +1,16 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.datmai.moviereservation.domain.ShowTime;
 import com.datmai.moviereservation.service.ScheduleService;
 import com.datmai.moviereservation.service.ShowTimeService;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.showtime.ShowTimeDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.showtime.ShowTimeDTO;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 
 
@@ -28,15 +30,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "Show Time Controller")
 public class ShowTimeController {
 
     private final ShowTimeService showTimeService;
     private final ScheduleService scheduleService;
-
-    public ShowTimeController(ShowTimeService showTimeService, ScheduleService scheduleService) {
-        this.showTimeService = showTimeService;
-        this.scheduleService = scheduleService;
-    }
 
     @PostMapping("/show-times")
     @ApiMessage("Create show time successfully")

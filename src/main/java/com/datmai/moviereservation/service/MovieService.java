@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 
 import com.datmai.moviereservation.domain.Movie;
 import com.datmai.moviereservation.repository.MovieRepository;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
 
 @Service
 public class MovieService {

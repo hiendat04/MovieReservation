@@ -2,8 +2,8 @@ package com.datmai.moviereservation.domain;
 
 import java.time.Instant;
 
-import com.datmai.moviereservation.util.constant.SeatStatus;
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.constant.SeatStatus;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

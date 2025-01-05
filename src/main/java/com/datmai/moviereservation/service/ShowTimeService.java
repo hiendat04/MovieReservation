@@ -14,10 +14,10 @@ import com.datmai.moviereservation.domain.Schedule;
 import com.datmai.moviereservation.domain.Screen;
 import com.datmai.moviereservation.domain.ShowTime;
 import com.datmai.moviereservation.repository.ShowTimeRepository;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.FetchScheduleDTO;
-import com.datmai.moviereservation.util.dto.response.showtime.ShowTimeDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.schedule.FetchScheduleDTO;
+import com.datmai.moviereservation.common.dto.response.showtime.ShowTimeDTO;
+import com.datmai.moviereservation.exception.ExistingException;
 
 @Service
 public class ShowTimeService {

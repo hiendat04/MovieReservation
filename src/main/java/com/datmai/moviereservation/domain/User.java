@@ -3,8 +3,8 @@ package com.datmai.moviereservation.domain;
 import java.time.Instant;
 import java.util.List;
 
-import com.datmai.moviereservation.util.constant.GenderEnum;
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.constant.GenderEnum;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.Column;

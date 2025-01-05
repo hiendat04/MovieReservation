@@ -1,15 +1,18 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.datmai.moviereservation.domain.User;
 import com.datmai.moviereservation.service.UserService;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResCreateUserDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResUpdateUserDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResponseUserDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResCreateUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResUpdateUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResponseUserDTO;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 import com.turkraft.springfilter.boot.Filter;
 
 import jakarta.validation.Valid;
@@ -29,14 +32,13 @@ import org.springframework.web.bind.annotation.PutMapping;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "User Controller")
 public class UserController {
 
     private final UserService userService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
-    }
-
+    @Operation(summary = "Create a new user", description = "Detail description...")
     @PostMapping("/users")
     @ApiMessage("Create user successfully")
     public ResponseEntity<ResCreateUserDTO> createUser(@Valid @RequestBody User user) throws ExistingException {
@@ -99,7 +101,6 @@ public class UserController {
         // Delete user
         this.userService.deleteUser(id);
         return ResponseEntity.ok(null);
-
     }
 
 }

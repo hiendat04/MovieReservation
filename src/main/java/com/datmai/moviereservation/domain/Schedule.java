@@ -4,7 +4,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import jakarta.persistence.Entity;

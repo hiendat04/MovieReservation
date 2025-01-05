@@ -3,8 +3,6 @@ package com.datmai.moviereservation.service;
 import java.util.List;
 import java.util.Optional;
 
-import javax.naming.spi.DirStateFactory.Result;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -14,11 +12,10 @@ import com.datmai.moviereservation.domain.Schedule;
 import com.datmai.moviereservation.domain.Screen;
 import com.datmai.moviereservation.repository.ScheduleRepository;
 import com.datmai.moviereservation.repository.ScreenRepository;
-import com.datmai.moviereservation.util.constant.ScreenName;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.CreateScheduleDTO;
-import com.datmai.moviereservation.util.dto.response.schedule.CreateScheduleDTO.ScheduleScreen;
-import com.datmai.moviereservation.util.dto.response.screen.ScreenDTO;
+import com.datmai.moviereservation.common.constant.ScreenName;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.schedule.CreateScheduleDTO;
+import com.datmai.moviereservation.common.dto.response.screen.ScreenDTO;
 
 @Service
 public class ScreenService {

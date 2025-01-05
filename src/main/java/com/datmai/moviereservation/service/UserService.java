@@ -1,6 +1,5 @@
 package com.datmai.moviereservation.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -11,12 +10,10 @@ import org.springframework.stereotype.Service;
 
 import com.datmai.moviereservation.domain.User;
 import com.datmai.moviereservation.repository.UserRepository;
-import com.datmai.moviereservation.util.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResCreateUserDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResUpdateUserDTO;
-import com.datmai.moviereservation.util.dto.response.user.ResponseUserDTO;
-
-import io.micrometer.core.ipc.http.HttpSender.Response;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResCreateUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResUpdateUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.ResponseUserDTO;
 
 @Service
 public class UserService {

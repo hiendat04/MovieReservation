@@ -3,7 +3,7 @@ package com.datmai.moviereservation.config;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
-import com.datmai.moviereservation.util.security.SecurityUtil;
+import com.datmai.moviereservation.common.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -44,7 +44,8 @@ public class SecurityConfiguration {
         String[] whiteList = {
                 "/",
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
-                "/storage/**"
+                "/storage/**",
+                "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**"
         };
         http
                 .csrf(c -> c.disable())
@@ -54,16 +55,16 @@ public class SecurityConfiguration {
                                 .requestMatchers(whiteList).permitAll()
                                 .anyRequest().authenticated())
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()) // To activate
-                                                                                        // BearerTokenAuthenticationFilter
-                                                                                        // and this filter will extract
-                                                                                        // the Bearer Token (sent from
-                                                                                        // client) automatically to
-                                                                                        // start authenticating, we use
-                                                                                        // oauth to scale our project in
-                                                                                        // the future so
-                                                                                        // that server can communicate
-                                                                                        // with many services out there
-                                                                                        // (Frontend, Server, FB, GG...)
+                        // BearerTokenAuthenticationFilter
+                        // and this filter will extract
+                        // the Bearer Token (sent from
+                        // client) automatically to
+                        // start authenticating, we use
+                        // oauth to scale our project in
+                        // the future so
+                        // that server can communicate
+                        // with many services out there
+                        // (Frontend, Server, FB, GG...)
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -77,11 +78,11 @@ public class SecurityConfiguration {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         grantedAuthoritiesConverter.setAuthorityPrefix("");
         grantedAuthoritiesConverter.setAuthoritiesClaimName("permission "); // Tell Spring what claim we want to take
-                                                                            // from JWT
-                                                                            // and then load it into the authentication
-                                                                            // to set up authority for the authorization
-                                                                            // process further (in
-                                                                            // SecurityConfiguration.java file)
+        // from JWT
+        // and then load it into the authentication
+        // to set up authority for the authorization
+        // process further (in
+        // SecurityConfiguration.java file)
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);

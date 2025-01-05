@@ -31,5 +31,4 @@ public interface ShowTimeRepository extends JpaRepository<ShowTime, Long>, JpaSp
     Optional<ShowTime> findNearestUpperBound(@Param("newTime") LocalTime newTime,
             @Param("scheduleId") Long scheduleId,
             @Param("showTimeId") Long showTimeId);
-
 }

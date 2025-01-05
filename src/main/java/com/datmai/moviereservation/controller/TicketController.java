@@ -1,34 +1,43 @@
 package com.datmai.moviereservation.controller;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.datmai.moviereservation.domain.Ticket;
+import com.datmai.moviereservation.service.SeatService;
 import com.datmai.moviereservation.service.TicketService;
-import com.datmai.moviereservation.util.dto.response.ticket.TicketDTO;
-import com.datmai.moviereservation.util.error.ExistingException;
-import com.datmai.moviereservation.util.format.ApiMessage;
+import com.datmai.moviereservation.common.constant.SeatStatus;
+import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
+import com.datmai.moviereservation.common.dto.response.ticket.TicketDTO;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.common.format.ApiMessage;
 
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api/v1")
+@RequiredArgsConstructor
+@Tag(name = "Ticket Controller")
 public class TicketController {
     private final TicketService ticketService;
-
-    public TicketController(
-            TicketService ticketService) {
-        this.ticketService = ticketService;
-    }
+    private final SeatService seatService;
 
     @PostMapping("/tickets")
     @ApiMessage("Create ticket successfully")
     public ResponseEntity<TicketDTO> createTicket(@RequestBody Ticket ticket) throws ExistingException {
-        
-        // Check if ticket exists by movie, schedule and seat
+
+        // Check if ticket exists by movie and seat
         if (this.ticketService.isTicketExist(ticket.getSchedule(), ticket.getSeat())) {
             throw new ExistingException("Ticket already exists");
         }
@@ -38,6 +47,60 @@ public class TicketController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(newTicket);
     }
-    
+
+    @PutMapping("/tickets")
+    @ApiMessage("Update schedule and seat successfully")
+    public ResponseEntity<TicketDTO> updateTicket(@RequestBody Ticket ticket) throws Exception {
+        // Check if ticket id exist
+        if (!this.ticketService.isTicketIdExist(ticket.getId())) {
+            throw new ExistingException("Ticket id = " + ticket.getId() + " does not exist");
+        }
+
+        // Check if ticket exists by movie and seat
+        if (this.ticketService.isTicketExist(ticket.getSchedule(), ticket.getSeat())) {
+            throw new ExistingException("Ticket already exists");
+        }
+
+        // Only allow update ticket if its seat is AVAILABLE
+        if (this.seatService.fetchSeatById(ticket.getSeat().getId()).getStatus() != SeatStatus.AVAILABLE) {
+            throw new ExistingException("Seat is not available. Please choose another seat");
+        }
+
+        TicketDTO updatedTicket = this.ticketService.updateTicket(ticket);
+
+        return ResponseEntity.ok().body(updatedTicket);
+    }
+
+    @GetMapping("tickets/{id}")
+    @ApiMessage("Fetch ticket successfully")
+    public ResponseEntity<TicketDTO> fetchTicket(@PathVariable long id) throws ExistingException {
+        // Check if ticket id exist
+        if (!this.ticketService.isTicketIdExist(id)) {
+            throw new ExistingException("Ticket id = " + id + " does not exist");
+        }
+        Ticket ticket = this.ticketService.fetchTicketById(id);
+        TicketDTO ticketDTO = this.ticketService.convertTicketDTO(ticket);
+        return ResponseEntity.ok().body(ticketDTO);
+    }
+
+    @GetMapping("tickets")
+    @ApiMessage("Fetch all tickets successfully")
+    public ResponseEntity<ResultPaginationDTO> fetchAllTickets(Pageable pageable, Specification<Ticket> specification) {
+        ResultPaginationDTO allTickets = this.ticketService.fetchAllTickets(specification, pageable);
+        return ResponseEntity.ok().body(allTickets);
+    }
+
+    @DeleteMapping("tickets/{id}")
+    @ApiMessage("Delete ticket successfully")
+    public ResponseEntity<Void> deleteTicket(@PathVariable long id) throws ExistingException {
+        // Check if ticket id exist
+        if (!this.ticketService.isTicketIdExist(id)) {
+            throw new ExistingException("Ticket id = " + id + " does not exist");
+        }
+
+        // Delete ticket
+        this.ticketService.deleteTicket(id);
+        return ResponseEntity.ok().body(null);
+    }
 
 }
