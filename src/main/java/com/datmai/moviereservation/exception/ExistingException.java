@@ -1,7 +1,14 @@
 package com.datmai.moviereservation.exception;
 
-public class ExistingException extends Exception{
-    public ExistingException(String message){
-        super(message);
+import lombok.Getter;
+
+import java.util.List;
+
+@Getter
+public class ExistingException extends RuntimeException {
+    private final List<String> errors;
+    public ExistingException(List<String> errors) {
+        super("Validation failed");
+        this.errors = errors;
     }
 }

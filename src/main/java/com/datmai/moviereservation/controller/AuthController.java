@@ -22,7 +22,7 @@ import com.datmai.moviereservation.domain.User;
 import com.datmai.moviereservation.service.UserService;
 import com.datmai.moviereservation.common.dto.request.RequestLoginDTO;
 import com.datmai.moviereservation.common.dto.response.login.ResponseLoginDTO;
-import com.datmai.moviereservation.common.dto.response.user.ResCreateUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.CreateUserRes;
 import com.datmai.moviereservation.exception.ExistingException;
 import com.datmai.moviereservation.common.format.ApiMessage;
 import com.datmai.moviereservation.common.security.SecurityUtil;
@@ -32,9 +32,11 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
-@Tag(name = "Authentiacation Controller")
+@Tag(name = "Authentication Controller")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -69,7 +71,7 @@ public class AuthController {
             ResponseLoginDTO.UserLogin user = new ResponseLoginDTO.UserLogin(
                     currentUser.getId(),
                     currentUser.getEmail(),
-                    currentUser.getName());
+                    currentUser.getUsername());
             responseLoginDTO.setUser(user);
         }
 
@@ -110,7 +112,7 @@ public class AuthController {
         if (currentUser != null) {
             user.setId(currentUser.getId());
             user.setEmail(email);
-            user.setName(currentUser.getName());
+            user.setUsername(currentUser.getUsername());
 
             userGetAccount.setUser(user);
         }
@@ -122,11 +124,12 @@ public class AuthController {
     @ApiMessage("Get user by refresh token")
     public ResponseEntity<ResponseLoginDTO> getRefreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "unavailable") String refresh_token // Server get
-                                                                                                    // refresh token
-                                                                                                    // from cookie
+            // refresh token
+            // from cookie
     ) throws ExistingException {
         if (refresh_token.equals("unavailable")) {
-            throw new ExistingException("Refresh token is unavailable in cookie");
+            throw new ExistingException(
+                    List.of("Refresh token is unavailable in cookie"));
         }
 
         // Server check if token is valid
@@ -138,7 +141,8 @@ public class AuthController {
         // Check user by token + email (to make the process more secured)
         User currentUser = this.userService.getUserByRefreshTokenAndEmail(refresh_token, email);
         if (currentUser == null) {
-            throw new ExistingException("Refresh token is invalid! ");
+            throw new ExistingException(
+                    List.of("Refresh token is invalid! "));
         }
 
         // Issue new token/ set refresh token as cookie
@@ -146,7 +150,7 @@ public class AuthController {
         ResponseLoginDTO.UserLogin user = new ResponseLoginDTO.UserLogin(
                 currentUser.getId(),
                 currentUser.getEmail(),
-                currentUser.getName());
+                currentUser.getUsername());
 
         responseLoginDTO.setUser(user);
 
@@ -178,10 +182,11 @@ public class AuthController {
     @ApiMessage("Logout successfully")
     public ResponseEntity<Void> logout() throws ExistingException {
         // Get the email of current user
-        String email = SecurityUtil.getCurrentUserLogin().get();
+        String email = SecurityUtil.getCurrentUserLogin().orElse(null);
 
         if (email.equals(null)) {
-            throw new ExistingException("Access  token is invalid");
+            throw new ExistingException(
+                    List.of("Access  token is invalid"));
         }
 
         // Set refresh cookie = null
@@ -204,11 +209,12 @@ public class AuthController {
 
     @PostMapping("/auth/register")
     @ApiMessage("Register successfully")
-    public ResponseEntity<ResCreateUserDTO> register(@Valid @RequestBody User user) throws ExistingException {
+    public ResponseEntity<CreateUserRes> register(@Valid @RequestBody User user) throws ExistingException {
 
         // Check if email exist
         if (this.userService.isEmailExist(user.getEmail())) {
-            throw new ExistingException("Email " + user.getEmail() + " is existing!. Please choose another email!");
+            throw new ExistingException(
+                    List.of("Email " + user.getEmail() + " is existing!. Please choose another email!"));
         }
 
         // Hash password
@@ -216,10 +222,8 @@ public class AuthController {
         user.setPassword(hashPassword);
 
         // Save user
-        User registerUser = this.userService.createUser(user);
+        CreateUserRes res = this.userService.createUser(user);
 
-        // Convert to DTO (not to show password)
-        ResCreateUserDTO res = this.userService.convertCreateUserDTO(registerUser);
         return ResponseEntity.ok().body(res);
     }
 

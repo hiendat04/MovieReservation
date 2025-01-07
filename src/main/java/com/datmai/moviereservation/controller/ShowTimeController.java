@@ -28,6 +28,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -41,47 +43,20 @@ public class ShowTimeController {
     @ApiMessage("Create show time successfully")
     public ResponseEntity<ShowTimeDTO> createShowTime(@Valid @RequestBody ShowTime time) throws ExistingException {
 
-        // Check if schedule exists
-        if (this.scheduleService.fetchScheduleById(time.getSchedule().getId()) == null) {
-            throw new ExistingException("Schedule id = " + time.getSchedule().getId() + " does not exist");
-        }
+        // Validate create show time request
+        this.showTimeService.validateCreateShowTimeReq(time);
 
-        // Then check if show time exists in that schedule
-        if (this.showTimeService.isShowTimeExist(time.getTime(), time.getSchedule())) {
-            throw new ExistingException(
-                    "Show time at " + time.getTime() + " on "
-                            + this.scheduleService.fetchScheduleById(time.getSchedule().getId()).getDate()
-                            + " already exists");
-        }
+        ShowTimeDTO showTime = this.showTimeService.createShowTime(time);
 
-        // Finally check if new show time overlap
-        this.showTimeService.isShowTimeOverlap(time.getTime(), time.getSchedule().getId(), null);
-
-        ShowTime showTime = this.showTimeService.createShowTime(time);
-        ShowTimeDTO res = this.showTimeService.convertShowTimeDTO(showTime);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        return ResponseEntity.status(HttpStatus.CREATED).body(showTime);
     }
 
     @PutMapping("/show-times")
     @ApiMessage("Update show time successfully")
     public ResponseEntity<ShowTimeDTO> updateShowTime(@RequestBody ShowTime showTime) throws ExistingException {
-        // Check if show time exist by id
-        if (this.showTimeService.fetchShowTimeById(showTime.getId()) == null) {
-            throw new ExistingException("Show time id = " + showTime.getId() + " does not exist");
-        }
 
-        // Check if request update show time already exists
-        if (this.showTimeService.isShowTimeExist(showTime.getTime(), showTime.getSchedule())) {
-            throw new ExistingException(
-                    "Show time at " + showTime.getTime() + " on "
-                            + this.scheduleService.fetchScheduleById(showTime.getSchedule().getId()).getDate()
-                            + " already exists");
-        }
-
-        // Check if the updated show time will overlap
-        long scheduleId = this.showTimeService.fetchShowTimeById(showTime.getId()).getSchedule().getId();
-        this.showTimeService.isShowTimeOverlap(showTime.getTime(), scheduleId, showTime.getId());
+        //Validate update show time request
+        this.showTimeService.validateUpdateShowTimeReq(showTime);
 
         // Update show time
         ShowTimeDTO res = this.showTimeService.updateShowTime(showTime);
@@ -94,11 +69,10 @@ public class ShowTimeController {
     public ResponseEntity<ShowTimeDTO> fetchShowTime(@PathVariable long id) throws ExistingException {
 
         // Check if show time exists
-        ShowTime showTime = this.showTimeService.fetchShowTimeById(id);
-        if (showTime == null) {
-            throw new ExistingException("Show time id = " + id + " does not exist");
-        }
-        ShowTimeDTO res = this.showTimeService.convertShowTimeDTO(showTime);
+        this.showTimeService.validateShowTimeExist(id);
+
+        ShowTime fetchedShowTime = this.showTimeService.fetchShowTimeById(id);
+        ShowTimeDTO res = this.showTimeService.convertShowTimeDTO(fetchedShowTime);
         return ResponseEntity.ok().body(res);
     }
 
@@ -114,12 +88,10 @@ public class ShowTimeController {
     @ApiMessage("Delete show time successfully")
     public ResponseEntity<Void> deleteShowTime(@PathVariable long id) throws ExistingException {
         // Check if show time exists
-        ShowTime showTime = this.showTimeService.fetchShowTimeById(id);
-        if (showTime == null) {
-            throw new ExistingException("Show time id = " + id + " does not exist");
-        }
+        this.showTimeService.validateShowTimeExist(id);
 
-        this.showTimeService.deleteShowTime(showTime);
+        // Delete show time
+        this.showTimeService.deleteShowTime(id);
         return ResponseEntity.ok(null);
     }
 

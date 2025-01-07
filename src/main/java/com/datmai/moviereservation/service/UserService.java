@@ -1,8 +1,16 @@
 package com.datmai.moviereservation.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.datmai.moviereservation.common.constant.UserStatus;
+import com.datmai.moviereservation.common.constant.UserType;
+import com.datmai.moviereservation.domain.Address;
+import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.repository.AddressRepository;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -11,38 +19,78 @@ import org.springframework.stereotype.Service;
 import com.datmai.moviereservation.domain.User;
 import com.datmai.moviereservation.repository.UserRepository;
 import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
-import com.datmai.moviereservation.common.dto.response.user.ResCreateUserDTO;
-import com.datmai.moviereservation.common.dto.response.user.ResUpdateUserDTO;
-import com.datmai.moviereservation.common.dto.response.user.ResponseUserDTO;
+import com.datmai.moviereservation.common.dto.response.user.CreateUserRes;
+import com.datmai.moviereservation.common.dto.response.user.UpdateUserRes;
+import com.datmai.moviereservation.common.dto.response.user.UserFetchRes;
 
 @Service
+@Slf4j(topic = "USER-SERVICE")
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
+    private final AddressRepository addressRepository;
 
-    public UserService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CreateUserRes createUser(User user) {
+        log.info("Creating user {}", user);
+        user.setStatus(UserStatus.NONE);
+        user.setType(UserType.USER);
+
+        // Create user's address
+        Address address = new Address();
+        address.setApartmentNumber(user.getAddress().getApartmentNumber());
+        address.setFloor(user.getAddress().getFloor());
+        address.setBuilding(user.getAddress().getBuilding());
+        address.setStreetNumber(user.getAddress().getStreetNumber());
+        address.setStreet(user.getAddress().getStreet());
+        address.setCity(user.getAddress().getCity());
+        address.setCountry(user.getAddress().getCountry());
+        address.setAddressType(user.getAddress().getAddressType());
+        log.info("Address: {}", address);
+        user.setAddress(address);
+
+        // Save user and their address
+        User newUser = this.userRepository.save(user);
+        this.addressRepository.save(address);
+
+        return this.convertCreateUserDTO(newUser);
     }
 
-    public User createUser(User user) {
-        return this.userRepository.save(user);
+    public void validateUserCreateReq(User user) {
+        List<String> errors = new ArrayList<>();
+
+        if (userRepository.existsByEmail(user.getEmail())) {
+            errors.add("Email already exists");
+        }
+        if (userRepository.existsByUsername(user.getUsername())) {
+            errors.add("Username already exists");
+        }
+        if (userRepository.existsByPhone(user.getPhone())) {
+            errors.add("Phone already exists");
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
     }
+
 
     public boolean isEmailExist(String email) {
         return this.userRepository.existsByEmail(email);
     }
 
-    public ResCreateUserDTO convertCreateUserDTO(User user) {
-        ResCreateUserDTO res = new ResCreateUserDTO();
-        if (user != null) {
-            res.setAddress(user.getAddress());
-            res.setAge(user.getAge());
-            res.setCreatedAt(user.getCreatedAt());
-            res.setCreatedBy(user.getCreatedBy());
-            res.setEmail(user.getEmail());
-            res.setGender(user.getGender());
-            res.setId(user.getId());
-        }
-        return res;
+    public CreateUserRes convertCreateUserDTO(User user) {
+        return CreateUserRes.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .gender(user.getGender())
+                .dateOfBirth(user.getDateOfBirth())
+                .type(user.getType())
+                .status(user.getStatus())
+                .address(user.getAddress())
+                .createdAt(user.getCreatedAt())
+                .createdBy(user.getCreatedBy()).build();
     }
 
     public boolean isIdExist(long id) {
@@ -51,31 +99,54 @@ public class UserService {
 
     public User updateUser(User user) {
         Optional<User> userOptional = this.userRepository.findById(user.getId());
-        User currentUser = userOptional.get();
-        if (currentUser != null) {
-            currentUser.setAddress(user.getAddress());
-            currentUser.setAge(user.getAge());
+        User currentUser = userOptional.orElse(null);
+        if (currentUser == null) return null;
+        else {
+            currentUser.setFirstName(user.getFirstName());
+            currentUser.setLastName(user.getLastName());
+            currentUser.setUsername(user.getUsername());
+            currentUser.setPhone(user.getPhone());
             currentUser.setGender(user.getGender());
-            currentUser.setName(user.getName());
-
+            currentUser.setDateOfBirth(user.getDateOfBirth());
+            currentUser.setType(user.getType());
+            currentUser.setStatus(user.getStatus());
+            currentUser.setAddress(user.getAddress());
             // Save updated user
             currentUser = this.userRepository.save(currentUser);
         }
         return currentUser;
     }
 
-    public ResUpdateUserDTO convertUpdateUserDTO(User user) {
-        ResUpdateUserDTO res = new ResUpdateUserDTO();
-        if (user != null) {
-            res.setAddress(user.getAddress());
-            res.setAge(user.getAge());
-            res.setGender(user.getGender());
-            res.setId(user.getId());
-            res.setName(user.getName());
-            res.setUpdatedAt(user.getUpdatedAt());
-            res.setUpdatedBy(user.getUpdatedBy());
-        }
-        return res;
+    public UpdateUserRes convertUpdateUserDTO(User user) {
+        return UpdateUserRes.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .gender(user.getGender())
+                .dateOfBirth(user.getDateOfBirth())
+                .type(user.getType())
+                .status(user.getStatus())
+                .address(user.getAddress())
+                .updatedAt(user.getUpdatedAt())
+                .updatedBy(user.getUpdatedBy()).build();
+    }
+
+    public UserFetchRes convertUserFetchDTO(User user) {
+        return UserFetchRes.builder()
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .username(user.getUsername())
+                .phone(user.getPhone())
+                .gender(user.getGender())
+                .dateOfBirth(user.getDateOfBirth())
+                .type(user.getType())
+                .status(user.getStatus())
+                .address(user.getAddress())
+                .createdAt(user.getCreatedAt())
+                .createdBy(user.getCreatedBy())
+                .updatedAt(user.getUpdatedAt())
+                .updatedBy(user.getUpdatedBy()).build();
     }
 
     public ResultPaginationDTO fetchAllUsers(Specification<User> specification, Pageable pageable) {
@@ -88,62 +159,42 @@ public class UserService {
         meta.setTotalElements(pageUser.getTotalElements());
         meta.setTotalPages(pageUser.getTotalPages());
         res.setMeta(meta);
-        System.out.println(">>>>> content" + pageUser.getContent());
-        List<ResponseUserDTO> users = pageUser.getContent().stream().map(user -> {
-            ResponseUserDTO resUser = new ResponseUserDTO();
-            resUser.setAddress(user.getAddress());
-            resUser.setAge(user.getAge());
-            resUser.setCreatedAt(user.getCreatedAt());
-            resUser.setCreatedBy(user.getCreatedBy());
-            resUser.setGender(user.getGender());
-            resUser.setId(user.getId());
-            resUser.setName(user.getName());
-            resUser.setUpdatedAt(user.getUpdatedAt());
-            resUser.setUpdatedBy(user.getUpdatedBy());
-
-            return resUser;
-        }).toList();
+        List<UserFetchRes> users = pageUser.getContent()
+                .stream()
+                .map(this::convertUserFetchDTO)
+                .toList();
         res.setResult(users);
         return res;
     }
 
-    public ResponseUserDTO fetchUserById(long id) {
+    public UserFetchRes fetchUserById(long id) {
         Optional<User> userOptional = this.userRepository.findById(id);
-        User currentUser = userOptional.get();
-        ResponseUserDTO resUser = new ResponseUserDTO();
-        if (currentUser != null) {
-            resUser.setAddress(currentUser.getAddress());
-            resUser.setAge(currentUser.getAge());
-            resUser.setCreatedAt(currentUser.getCreatedAt());
-            resUser.setCreatedBy(currentUser.getCreatedBy());
-            resUser.setGender(currentUser.getGender());
-            resUser.setId(currentUser.getId());
-            resUser.setName(currentUser.getName());
-            resUser.setUpdatedAt(currentUser.getUpdatedAt());
-            resUser.setUpdatedBy(currentUser.getUpdatedBy());
+        User currentUser = userOptional.orElse(null);
+        if (currentUser == null) {
+            return null;
         }
-        return resUser;
+        return this.convertUserFetchDTO(currentUser);
     }
 
-    public void deleteUser(long id){
+    public void deleteUser(long id) {
         this.userRepository.deleteById(id);
     }
 
-    public User fetchUserByEmail(String email){
+    public User fetchUserByEmail(String email) {
         return this.userRepository.findByEmail(email);
     }
 
-    public void updateUserToken(String token, String email){
+    public void updateUserToken(String token, String email) {
         // Fetch current user
         User user = this.fetchUserByEmail(email);
-        if(user != null){
+        if (user != null) {
             user.setRefreshToken(token);
             // Update token
-            user = this.createUser(user);
+            this.createUser(user);
         }
     }
 
-    public User getUserByRefreshTokenAndEmail(String refreshToken, String email){
+    public User getUserByRefreshTokenAndEmail(String refreshToken, String email) {
         return this.userRepository.findByRefreshTokenAndEmail(refreshToken, email);
     }
 }

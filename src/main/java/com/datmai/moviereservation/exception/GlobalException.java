@@ -3,12 +3,15 @@ package com.datmai.moviereservation.exception;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
+import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -22,10 +25,12 @@ public class GlobalException {
     // Handle all exception
     @ExceptionHandler(Exception.class)
     public ResponseEntity<RestResponse<Object>> handleAllException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<Object>();
-        res.setStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
-        res.setMessage(ex.getMessage());
-        res.setError("Internal Server Error");
+        RestResponse<Object> res = new RestResponse<Object>(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.getMessage(),
+                HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase(),
+            null
+        );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
     }
 
@@ -33,23 +38,26 @@ public class GlobalException {
             NoResourceFoundException.class
     })
     public ResponseEntity<RestResponse<Object>> handleNotFoundException(Exception e) {
-        RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(HttpStatus.NOT_FOUND.value());
-        res.setError("404 Not Found. URL may not exist...");
-        res.setMessage(e.getMessage());
+        RestResponse<Object> res = new RestResponse<>(
+                HttpStatus.NOT_FOUND.value(),
+                HttpStatus.NOT_FOUND.getReasonPhrase(),
+                e.getMessage(),
+                null
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
     @ExceptionHandler(value = {
             UsernameNotFoundException.class,
             BadCredentialsException.class,
-            ExistingException.class
     })
     public ResponseEntity<RestResponse<Object>> handleIdException(Exception ex) {
-        RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError("Exception occurs");
-        res.setMessage(ex.getMessage());
+        RestResponse<Object> res = new RestResponse<>(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                ex.getMessage(),
+                null
+        );
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
@@ -61,17 +69,29 @@ public class GlobalException {
         BindingResult result = methodArgumentNotValidException.getBindingResult();
         final List<FieldError> fieldErrors = result.getFieldErrors();
 
-        RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError(methodArgumentNotValidException.getBody().getDetail());
-
         ArrayList<String> errors = new ArrayList<>();
         for (FieldError f : fieldErrors) {
             errors.add(f.getDefaultMessage());
         }
 
-        res.setMessage(errors.size() > 1 ? errors : errors.get(0));
+        RestResponse<Object> res = new RestResponse<>(
+                HttpStatus.BAD_REQUEST.value(),
+                methodArgumentNotValidException.getBody().getDetail(),
+                errors.size() > 1 ? errors : errors.get(0),
+                null
+        );
 
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
+    }
+
+    @ExceptionHandler(value = ExistingException.class)
+    public ResponseEntity<RestResponse<Object>> handleExistingException(ExistingException ex) {
+        RestResponse<Object> res = new RestResponse<>(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage(),
+                ex.getErrors(),
+                null
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
 
@@ -79,11 +99,12 @@ public class GlobalException {
             FileUploadException.class
     })
     public ResponseEntity<RestResponse<Object>> handleFileUploadException(Exception e) {
-        RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(HttpStatus.BAD_REQUEST.value());
-        res.setError("Exception upload file");
-        res.setMessage(e.getMessage());
+        RestResponse<Object> res = new RestResponse<>(
+                HttpStatus.BAD_REQUEST.value(),
+                HttpStatus.BAD_REQUEST.getReasonPhrase(),
+                e.getMessage(),
+                null
+        );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(res);
     }
-
 }

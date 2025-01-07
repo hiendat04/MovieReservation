@@ -1,5 +1,6 @@
 package com.datmai.moviereservation.service;
 
+import com.datmai.moviereservation.exception.ExistingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -12,6 +13,9 @@ import com.datmai.moviereservation.repository.TicketRepository;
 import com.datmai.moviereservation.common.constant.SeatStatus;
 import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
 import com.datmai.moviereservation.common.dto.response.ticket.TicketDTO;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class TicketService {
@@ -52,7 +56,29 @@ public class TicketService {
     }
 
     public Ticket fetchTicketById(long id) {
-        return this.ticketRepository.findById(id) != null ? this.ticketRepository.findById(id).get() : null;
+        return this.ticketRepository.findById(id).isPresent() ? this.ticketRepository.findById(id).get() : null;
+    }
+
+    public void validateUpdateTicketRequest(Ticket ticket) {
+        List<String> errors = new ArrayList<>();
+        // Check if ticket id exist
+        if (!this.isTicketIdExist(ticket.getId())) {
+            errors.add("Ticket id = " + ticket.getId() + " does not exist");
+        }
+
+        // Check if ticket exists by movie and seat
+        if (this.isTicketExist(ticket.getSchedule(), ticket.getSeat())) {
+            errors.add("Ticket already exists");
+        }
+
+        // Only allow update ticket if its seat is AVAILABLE
+        if (this.seatService.fetchSeatById(ticket.getSeat().getId()).getStatus() != SeatStatus.AVAILABLE) {
+            errors.add("Seat is not available. Please choose another seat");
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
     }
 
     public TicketDTO updateTicket(Ticket ticket) {

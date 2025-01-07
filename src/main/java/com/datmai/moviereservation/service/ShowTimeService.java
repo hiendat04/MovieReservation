@@ -1,9 +1,12 @@
 package com.datmai.moviereservation.service;
 
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.boot.actuate.endpoint.Show;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,29 +23,77 @@ import com.datmai.moviereservation.common.dto.response.showtime.ShowTimeDTO;
 import com.datmai.moviereservation.exception.ExistingException;
 
 @Service
+@RequiredArgsConstructor
 public class ShowTimeService {
     private final ShowTimeRepository showTimeRepository;
     private final MovieService movieService;
     private final ScheduleService scheduleService;
     private final ScreenService screenService;
 
-    public ShowTimeService(ShowTimeRepository showTimeRepository, MovieService movieService,
-            ScheduleService scheduleService, ScreenService screenService) {
-        this.showTimeRepository = showTimeRepository;
-        this.movieService = movieService;
-        this.scheduleService = scheduleService;
-        this.screenService = screenService;
-    }
 
     public boolean isShowTimeExist(LocalTime time, Schedule schedule) {
         return this.showTimeRepository.existsByTimeAndSchedule(time, schedule);
     }
 
-    public ShowTime createShowTime(ShowTime time) {
-        return this.showTimeRepository.save(time);
+    public ShowTimeDTO createShowTime(ShowTime time) {
+        ShowTime newTime =  this.showTimeRepository.save(time);
+        return this.convertShowTimeDTO(newTime);
     }
 
-    public void isShowTimeOverlap(LocalTime newTime, Long scheduleId, Long showTimeId) throws ExistingException {
+    public void validateCreateShowTimeReq(ShowTime time) {
+        List<String> errors = new ArrayList<>();
+        // Check if schedule exists
+        if (this.scheduleService.fetchScheduleById(time.getSchedule().getId()) == null) {
+            errors.add("Schedule id = " + time.getSchedule().getId() + " does not exist");
+        }
+
+        // Then check if show time exists in that schedule
+        if (this.isShowTimeExist(time.getTime(), time.getSchedule())) {
+            errors.add(
+                    "Show time at " + time.getTime() + " on "
+                            + this.scheduleService.fetchScheduleById(time.getSchedule().getId()).getDate()
+                            + " already exists");
+        }
+
+        // Finally check if new show time overlap
+        String overlapError = this.checkShowTimeOverlap(time.getTime(), time.getSchedule().getId(), time.getId());
+        if(overlapError != null) {
+            errors.add(overlapError);
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
+    }
+
+    public void validateUpdateShowTimeReq(ShowTime showTime) {
+        List<String> errors = new ArrayList<>();
+        // Check if show time exist by id
+        if (this.fetchShowTimeById(showTime.getId()) == null) {
+            errors.add("Show time id = " + showTime.getId() + " does not exist");
+        }
+
+        // Check if request update show time already exists
+        if (this.isShowTimeExist(showTime.getTime(), showTime.getSchedule())) {
+            errors.add(
+                    "Show time at " + showTime.getTime() + " on "
+                            + this.scheduleService.fetchScheduleById(showTime.getSchedule().getId()).getDate()
+                            + " already exists");
+        }
+
+        // Check if the updated show time will overlap
+        Long scheduleId = this.fetchShowTimeById(showTime.getId()).getSchedule().getId();
+        String overlapError = this.checkShowTimeOverlap(showTime.getTime(), scheduleId, showTime.getId());
+        if(overlapError != null) {
+            errors.add(overlapError);
+        }
+
+        if (!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
+    }
+
+    public String checkShowTimeOverlap(LocalTime newTime, Long scheduleId, Long showTimeId) throws ExistingException {
         // // Get the duration of the movie in the schedule
         Schedule schedule = this.scheduleService.fetchScheduleById(scheduleId);
         int movieDurationMinutes = this.movieService.fetchMovieById(schedule.getMovie().getId()).getDuration();
@@ -55,8 +106,7 @@ public class ShowTimeService {
         if (lowerBound.isPresent()) {
             LocalTime lowerEndTime = lowerBound.get().getTime().plusMinutes(movieDurationMinutes + 29);
             if (!newTime.isAfter(lowerEndTime)) {
-                throw new ExistingException(
-                        "The new showtime overlaps with the previous showtime. Ensure a 30-minute gap.");
+                return "The new showtime overlaps with the previous showtime. Ensure a 30-minute gap.";
             }
         }
 
@@ -64,9 +114,17 @@ public class ShowTimeService {
         if (upperBound.isPresent()) {
             LocalTime upperStartTime = upperBound.get().getTime().minusMinutes(movieDurationMinutes + 29);
             if (!newTime.isBefore(upperStartTime)) {
-                throw new ExistingException(
-                        "The new showtime overlaps with the next showtime. Ensure a 30-minute gap.");
+                return "The new showtime overlaps with the previous showtime. Ensure a 30-minute gap.";
             }
+        }
+        return null;
+    }
+
+    public void validateShowTimeExist(Long id) {
+        ShowTime showTime = this.fetchShowTimeById(id);
+        if (showTime == null) {
+            throw new ExistingException(
+                    List.of("Show time id = " + id + " does not exist"));
         }
     }
 
@@ -95,7 +153,7 @@ public class ShowTimeService {
     }
 
     public ShowTimeDTO updateShowTime(ShowTime showTime) {
-        // Get the show time that will be updated
+        // Get the showtime that will be updated
         ShowTime currentShowTime = this.fetchShowTimeById(showTime.getId());
         if (currentShowTime != null) {
             // Set only the updated time
@@ -125,7 +183,7 @@ public class ShowTimeService {
         return res;
     }
 
-    public void deleteShowTime(ShowTime showTime) {
-        this.showTimeRepository.deleteById(showTime.getId());
+    public void deleteShowTime(Long id) {
+        this.showTimeRepository.deleteById(id);
     }
 }

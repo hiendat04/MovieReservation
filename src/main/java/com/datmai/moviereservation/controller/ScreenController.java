@@ -23,6 +23,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -36,7 +38,8 @@ public class ScreenController {
     public ResponseEntity<ScreenDTO> createScreen(@RequestBody Screen screen) throws ExistingException {
         // Check if screen exist
         if (this.screenService.isScreenExist(screen.getName())) {
-            throw new ExistingException("Screen " + screen.getName() + " already exists");
+            throw new ExistingException(
+                    List.of("Screen " + screen.getName() + " already exists"));
         }
 
         ScreenDTO newScreen = this.screenService.createScreen(screen);
@@ -47,15 +50,8 @@ public class ScreenController {
     @ApiMessage("Update screen successfully")
     public ResponseEntity<ScreenDTO> updateScreen(@RequestBody Screen screen) throws ExistingException {
 
-        // Check if screen id exist
-        if (this.screenService.fetchScreenById(screen.getId()) == null) {
-            throw new ExistingException("Screen id = " + screen.getId() + " does not exist");
-        }
-
-        // Check if screen name exists
-        if (this.screenService.isScreenExist(screen.getName())) {
-            throw new ExistingException("Screen " + screen.getName() + " already exists");
-        }
+        //Validate update screen request
+        this.screenService.validateUpdateScreenRequest(screen);
 
         ScreenDTO updatedScreen = this.screenService.updateScreen(screen);
 
@@ -68,7 +64,8 @@ public class ScreenController {
         // Check if screen id exist
         Screen screen = this.screenService.fetchScreenById(id);
         if (screen == null) {
-            throw new ExistingException("Screen id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Screen id = " + id + " does not exist"));
         }
 
         ScreenDTO res = this.screenService.convertScreenDTO(screen);
@@ -91,7 +88,8 @@ public class ScreenController {
         // Check if screen id exist
         Screen screen = this.screenService.fetchScreenById(id);
         if (screen == null) {
-            throw new ExistingException("Screen id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Screen id = " + id + " does not exist"));
         }
 
         this.screenService.deleteScreen(screen);

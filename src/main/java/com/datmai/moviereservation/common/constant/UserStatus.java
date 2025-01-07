@@ -1,5 +1,5 @@
 package com.datmai.moviereservation.common.constant;
 
-public enum GenderEnum {
-    MALE, FEMALE
+public enum UserStatus {
+    NONE, ACTIVE, INACTIVE
 }

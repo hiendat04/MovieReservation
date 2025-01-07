@@ -18,7 +18,7 @@ public class ResponseLoginDTO {
     public static class UserLogin {
         private long id;
         private String email;
-        private String name;
+        private String username;
     }
 
     // Change the data is covered by the prefix "user" in response body
@@ -37,7 +37,7 @@ public class ResponseLoginDTO {
     public static class UserInsideToken {
         private long id;
         private String email;
-        private String name;
+        private String username;
     }
 
 }

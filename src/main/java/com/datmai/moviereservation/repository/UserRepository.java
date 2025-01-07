@@ -10,6 +10,10 @@ import com.datmai.moviereservation.domain.User;
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
     boolean existsByEmail(String email);
 
+    boolean existsByUsername(String username);
+
+    boolean existsByPhone(String phone);
+
     User findByEmail(String email);
 
     User findByRefreshTokenAndEmail(String refreshToken, String email);

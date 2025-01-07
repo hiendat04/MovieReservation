@@ -32,7 +32,7 @@ public class FormatRestResponse implements ResponseBodyAdvice<Object> {
         int status = servletResponse.getStatus();
 
         RestResponse<Object> res = new RestResponse<>();
-        res.setStatusCode(status);
+        res.setStatus(status);
 
         if (!MediaType.APPLICATION_JSON.equals(selectedContentType)) {
             return body;

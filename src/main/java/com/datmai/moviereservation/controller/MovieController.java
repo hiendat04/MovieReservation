@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -41,7 +43,7 @@ public class MovieController {
         // Check if movie exist by name and director
         if (this.movieService.isMovieExist(movie.getName(), movie.getDirector())) {
             throw new ExistingException(
-                    "Movie " + movie.getName() + " of director " + movie.getDirector() + " already exists");
+                    List.of("Movie " + movie.getName() + " of director " + movie.getDirector() + " already exists"));
         }
         Movie newMovie = this.movieService.createMovie(movie);
 
@@ -55,7 +57,8 @@ public class MovieController {
         // Check if movie id exists
         Movie currentMovie = this.movieService.fetchMovieById(requestMovie.getId());
         if (currentMovie == null) {
-            throw new ExistingException("Movie id = " + requestMovie.getId() + " does not exist");
+            throw new ExistingException(
+                    List.of("Movie id = " + requestMovie.getId() + " does not exist"));
         }
 
         Movie updatedMovie = this.movieService.updateMovie(requestMovie);
@@ -68,7 +71,8 @@ public class MovieController {
         // Check if movie id exists
         Movie movie = this.movieService.fetchMovieById(id);
         if (movie == null) {
-            throw new ExistingException("Movie id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of(+ id + " does not exist"));
         }
         return ResponseEntity.ok().body(movie);
     }
@@ -86,7 +90,8 @@ public class MovieController {
         // Check if movie id exists
         Movie movie = this.movieService.fetchMovieById(id);
         if (movie == null) {
-            throw new ExistingException("Movie id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Movie id = " + id + " does not exist"));
         }
         this.movieService.deleteMovie(id);
         return ResponseEntity.ok(null);

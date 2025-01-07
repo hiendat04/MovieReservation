@@ -30,6 +30,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -44,48 +46,25 @@ public class ScheduleController {
     public ResponseEntity<CreateScheduleDTO> createSchedule(@Valid @RequestBody Schedule schedule)
             throws ExistingException {
 
-        // Check if movie exist
-        if (this.movieService.fetchMovieById(schedule.getMovie().getId()) == null) {
-            throw new ExistingException("Movie id = " + schedule.getMovie().getId() + " does not exist");
-        }
-
-        // Check if screen exist
-        if (this.screenService.fetchScreenById(schedule.getScreen().getId()) == null) {
-            throw new ExistingException("Screen id = " + schedule.getScreen().getId() + " does not exist");
-        }
-
-        // Check if schedule exist
-        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
-            throw new ExistingException("Schedule already exist");
-        }
+       //Validate create schedule request
+        this.scheduleService.validateCreateScheduleRequest(schedule);
 
         // Create new schedule
-        Schedule newSchedule = this.scheduleService.createSchedule(schedule);
+        CreateScheduleDTO newSchedule = this.scheduleService.createSchedule(schedule);
 
-        // Convert DTO
-        CreateScheduleDTO res = this.scheduleService.convertCreateScheduleDTO(newSchedule);
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(res);
+        return ResponseEntity.status(HttpStatus.CREATED).body(newSchedule);
     }
 
     @PutMapping("/schedules")
     @ApiMessage("Update schedule successfully")
     public ResponseEntity<UpdateScheduleDTO> updateSchedule(@RequestBody Schedule schedule) throws ExistingException {
-        // Check if id exist
-        if (this.scheduleService.fetchScheduleById(schedule.getId()) == null) {
-            throw new ExistingException("Schedule id = " + schedule.getId() + " does not exist");
-        }
-
-        // Check if schedule exist
-        if (this.scheduleService.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
-            throw new ExistingException("Schedule already exist");
-        }
+        // Validate update schedule request
+        this.scheduleService.validateUpdateScheduleRequest(schedule);
 
         // Update schedule
-        Schedule updatedSchedule = this.scheduleService.updateSchedule(schedule);
-        UpdateScheduleDTO res = this.scheduleService.convertUpdateDTO(updatedSchedule);
+        UpdateScheduleDTO updatedSchedule = this.scheduleService.updateSchedule(schedule);
 
-        return ResponseEntity.ok().body(res);
+        return ResponseEntity.ok().body(updatedSchedule);
     }
 
     @GetMapping("/schedules/{id}")
@@ -95,7 +74,8 @@ public class ScheduleController {
         // Check if id exist
         Schedule schedule = this.scheduleService.fetchScheduleById(id);
         if (schedule == null) {
-            throw new ExistingException("Schedule id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Schedule id = " + id + " does not exist"));
         }
         FetchScheduleDTO res = this.scheduleService.convertFetchScheduleDTO(schedule);
         return ResponseEntity.ok().body(res);
@@ -114,7 +94,8 @@ public class ScheduleController {
         // Check if id exist
         Schedule schedule = this.scheduleService.fetchScheduleById(id);
         if (schedule == null) {
-            throw new ExistingException("Schedule id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Schedule id = " + id + " does not exist"));
         }
         this.scheduleService.deleteById(id);
         return ResponseEntity.ok(null);

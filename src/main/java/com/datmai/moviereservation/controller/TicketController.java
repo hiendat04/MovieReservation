@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1")
 @RequiredArgsConstructor
@@ -39,7 +41,8 @@ public class TicketController {
 
         // Check if ticket exists by movie and seat
         if (this.ticketService.isTicketExist(ticket.getSchedule(), ticket.getSeat())) {
-            throw new ExistingException("Ticket already exists");
+            throw new ExistingException(
+                    List.of("Ticket already exists"));
         }
 
         // Create new ticket
@@ -51,20 +54,9 @@ public class TicketController {
     @PutMapping("/tickets")
     @ApiMessage("Update schedule and seat successfully")
     public ResponseEntity<TicketDTO> updateTicket(@RequestBody Ticket ticket) throws Exception {
-        // Check if ticket id exist
-        if (!this.ticketService.isTicketIdExist(ticket.getId())) {
-            throw new ExistingException("Ticket id = " + ticket.getId() + " does not exist");
-        }
 
-        // Check if ticket exists by movie and seat
-        if (this.ticketService.isTicketExist(ticket.getSchedule(), ticket.getSeat())) {
-            throw new ExistingException("Ticket already exists");
-        }
-
-        // Only allow update ticket if its seat is AVAILABLE
-        if (this.seatService.fetchSeatById(ticket.getSeat().getId()).getStatus() != SeatStatus.AVAILABLE) {
-            throw new ExistingException("Seat is not available. Please choose another seat");
-        }
+        //Validate update ticket request
+        this.ticketService.validateUpdateTicketRequest(ticket);
 
         TicketDTO updatedTicket = this.ticketService.updateTicket(ticket);
 
@@ -76,7 +68,8 @@ public class TicketController {
     public ResponseEntity<TicketDTO> fetchTicket(@PathVariable long id) throws ExistingException {
         // Check if ticket id exist
         if (!this.ticketService.isTicketIdExist(id)) {
-            throw new ExistingException("Ticket id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Ticket id = " + id + " does not exist"));
         }
         Ticket ticket = this.ticketService.fetchTicketById(id);
         TicketDTO ticketDTO = this.ticketService.convertTicketDTO(ticket);
@@ -95,7 +88,8 @@ public class TicketController {
     public ResponseEntity<Void> deleteTicket(@PathVariable long id) throws ExistingException {
         // Check if ticket id exist
         if (!this.ticketService.isTicketIdExist(id)) {
-            throw new ExistingException("Ticket id = " + id + " does not exist");
+            throw new ExistingException(
+                    List.of("Ticket id = " + id + " does not exist"));
         }
 
         // Delete ticket

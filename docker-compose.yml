@@ -7,12 +7,28 @@ services:
     restart: always
     environment:
       - MYSQL_DATABASE=root
-      - MYSQL_ROOT_PASSWORD=04042003HienDat
+      - MYSQL_ROOT_PASSWORD=123456
     ports:
       - '3306:3306'
     volumes:
       - mysql_data:/var/lib/mysql
       - ./initdb.sql:/docker-entrypoint-initdb.d/initdb.sql
+    networks:
+      - default
+
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      PGDATA: /data/postgres
+    volumes:
+      - postgres:/data/postgres
+      - ./initdb.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - '5439:5432'
     networks:
       - default
 

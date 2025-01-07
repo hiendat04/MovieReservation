@@ -1,8 +1,10 @@
 package com.datmai.moviereservation.service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.datmai.moviereservation.exception.ExistingException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -29,7 +31,7 @@ public class ScreenService {
 
     public Screen fetchScreenById(long id) {
         Optional<Screen> screenOptional = this.screenRepository.findById(id);
-        Screen currentScreen = screenOptional.isPresent() ? screenOptional.get() : null;
+        Screen currentScreen = screenOptional.orElse(null);
         return currentScreen;
     }
 
@@ -42,6 +44,23 @@ public class ScreenService {
             return this.convertScreenDTO(this.screenRepository.save(screen));
         }
         return null;
+    }
+
+    public void validateUpdateScreenRequest(Screen screen) {
+        List<String> errors = new ArrayList<>();
+        // Check if screen id exist
+        if (this.fetchScreenById(screen.getId()) == null) {
+            errors.add("Screen id = " + screen.getId() + " does not exist");
+        }
+        // Check if screen name exists
+        if (this.isScreenExist(screen.getName())) {
+            errors.add("Screen " + screen.getName() + " already exists");
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
+
     }
 
     public ScreenDTO updateScreen(Screen screen) {

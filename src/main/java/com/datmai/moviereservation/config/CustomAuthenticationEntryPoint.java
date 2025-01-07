@@ -32,8 +32,8 @@ public class CustomAuthenticationEntryPoint implements AuthenticationEntryPoint 
         this.delegate.commence(request, response, authException);
         response.setContentType("application/json;charset=UTF-8");
 
-        RestResponse<Object> res = new RestResponse<Object>();
-        res.setStatusCode(HttpStatus.UNAUTHORIZED.value());
+        RestResponse<Object> res = new RestResponse<>();
+        res.setStatus(HttpStatus.UNAUTHORIZED.value());
 
         String errorMessage = Optional.ofNullable(authException.getCause()) // Check if client send no Token to access
                                                                             // any APIs in the server

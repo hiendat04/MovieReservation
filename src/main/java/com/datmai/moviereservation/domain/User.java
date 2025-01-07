@@ -1,29 +1,22 @@
 package com.datmai.moviereservation.domain;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
-import com.datmai.moviereservation.common.constant.GenderEnum;
+import com.datmai.moviereservation.common.constant.Gender;
+import com.datmai.moviereservation.common.constant.UserStatus;
+import com.datmai.moviereservation.common.constant.UserType;
 import com.datmai.moviereservation.common.security.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 @Entity
 @Table(name = "users")
@@ -33,33 +26,55 @@ public class User {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
-    @NotBlank(message = "Email cannot be empty")
+    private String firstName;
+
+    private String lastName;
+
+    @NotBlank(message = "Email cannot be blank")
+    @Column(unique = true)
     private String email;
 
-    @NotBlank(message = "Password cannot be empty")
+    @Column(unique = true, nullable = false, length = 255)
+    private String username;
+
+    @Column(unique = true, nullable = false, length = 15)
+    private String phone;
+
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
-    @Column(columnDefinition = "MEDIUMTEXT")
+    @Column(columnDefinition = "TEXT")
     private String refreshToken;
 
     @Enumerated(EnumType.STRING)
-    private GenderEnum gender;
+    private Gender gender;
 
-    private String name;
-    private long age;
-    private String address;
+    @JsonFormat(pattern = "dd/MM/yyyy")
+    private LocalDate dateOfBirth;
 
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    private UserType type;
+
+    @Enumerated(EnumType.STRING)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    private UserStatus status;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "address_id", referencedColumnName = "id")
+    private Address address;
+
+    @Temporal(TemporalType.TIMESTAMP)
     private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
 
-    // Many To One -> Role
-    @ManyToOne
-    @JoinColumn(name = "role_id")
-    private Role role;
+    private String createdBy;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    private Instant updatedAt;
+
+    private String updatedBy;
 
     // One To Many -> Ticket
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
@@ -68,7 +83,7 @@ public class User {
 
     @PrePersist
     public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.createdAt = Instant.now();
@@ -76,7 +91,7 @@ public class User {
 
     @PreUpdate
     public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent() == true
+        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
                 ? SecurityUtil.getCurrentUserLogin().get()
                 : "";
         this.updatedAt = Instant.now();

@@ -1,9 +1,12 @@
 package com.datmai.moviereservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.datmai.moviereservation.exception.ExistingException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -19,27 +22,59 @@ import com.datmai.moviereservation.common.dto.response.schedule.FetchScheduleDTO
 import com.datmai.moviereservation.common.dto.response.schedule.UpdateScheduleDTO;
 
 @Service
+@RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
     private final MovieService movieService;
     private final ScreenService screenService;
 
-    public ScheduleService(ScheduleRepository scheduleRepository, MovieService movieService,
-            ScreenService screenService) {
-        this.scheduleRepository = scheduleRepository;
-        this.movieService = movieService;
-        this.screenService = screenService;
-    }
 
     public boolean isScheduleExist(Screen screen, Movie movie, LocalDate date) {
         return this.scheduleRepository.existsByScreenAndMovieAndDate(screen, movie, date);
     }
 
-    public Schedule createSchedule(Schedule schedule) {
-        if (!this.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
-            return this.scheduleRepository.save(schedule);
+    public CreateScheduleDTO createSchedule(Schedule schedule) {
+        Schedule savedSchedule = this.scheduleRepository.save(schedule);
+        return this.convertCreateScheduleDTO(savedSchedule);
+    }
+
+    public void validateCreateScheduleRequest(Schedule schedule) {
+        List<String> errors = new ArrayList<>();
+        // Check if movie exist
+        if (this.movieService.fetchMovieById(schedule.getMovie().getId()) == null) {
+            errors.add("Movie id = " + schedule.getMovie().getId() + " does not exist");
         }
-        return null;
+
+        // Check if screen exist
+        if (this.screenService.fetchScreenById(schedule.getScreen().getId()) == null) {
+            errors.add("Screen id = " + schedule.getScreen().getId() + " does not exist");
+        }
+
+        // Check if schedule exist
+        if (this.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
+            errors.add("Schedule already exist");
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
+    }
+
+    public void validateUpdateScheduleRequest(Schedule schedule) {
+        List<String> errors = new ArrayList<>();
+        // Check if id exist
+        if (this.fetchScheduleById(schedule.getId()) == null) {
+            errors.add("Schedule id = " + schedule.getId() + " does not exist");
+        }
+
+        // Check if schedule exist
+        if (this.isScheduleExist(schedule.getScreen(), schedule.getMovie(), schedule.getDate())) {
+            errors.add("Schedule already exist");
+        }
+
+        if(!errors.isEmpty()) {
+            throw new ExistingException(errors);
+        }
     }
 
     public CreateScheduleDTO convertCreateScheduleDTO(Schedule schedule) {
@@ -59,11 +94,11 @@ public class ScheduleService {
 
     public Schedule fetchScheduleById(long id) {
         Optional<Schedule> scheduleOptional = this.scheduleRepository.findById(id);
-        Schedule currentSchedule = scheduleOptional.isPresent() ? scheduleOptional.get() : null;
+        Schedule currentSchedule = scheduleOptional.orElse(null);
         return currentSchedule;
     }
 
-    public Schedule updateSchedule(Schedule schedule) {
+    public UpdateScheduleDTO updateSchedule(Schedule schedule) {
         Schedule currentSchedule = this.fetchScheduleById(schedule.getId());
         if (currentSchedule != null) {
             currentSchedule.setDate(schedule.getDate());
@@ -72,10 +107,11 @@ public class ScheduleService {
 
             currentSchedule = this.scheduleRepository.save(currentSchedule);
         }
-        return currentSchedule;
+        return this.convertUpdateScheduleDTO(currentSchedule);
     }
 
-    public UpdateScheduleDTO convertUpdateDTO(Schedule schedule) {
+    public UpdateScheduleDTO convertUpdateScheduleDTO(Schedule schedule) {
+        if (schedule == null) {return null;}
         Movie movie = this.movieService.fetchMovieById(schedule.getMovie().getId());
         Screen screen = this.screenService.fetchScreenById(schedule.getScreen().getId());
         UpdateScheduleDTO res = new UpdateScheduleDTO(
