@@ -1,9 +1,25 @@
 server:
   port: 8080
 
+hiendat:
+  jwt:
+    refresh-token-validity-in-seconds: '8640000'
+    base64-secret: ${JWT_BASE64_SECRET}
+    access-token-validity-in-seconds: '8640000'
+  upload-file:
+    base-uri: file:///C:/Users/Admin/OneDrive/Spring%20REST%20Project/movie_upload/
+
+
 spring:
   application:
     name: moviereservation
+  data:
+    web:
+      pageable:
+        one-indexed-parameters: true
+  sendGrid:
+    apiKey: ${SENDGRID_API_KEY}
+    fromEmail: hiendat04@gmail.com
   profiles:
     active: @spring.profiles.active@
 

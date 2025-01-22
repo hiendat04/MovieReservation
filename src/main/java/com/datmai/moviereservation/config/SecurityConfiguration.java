@@ -3,7 +3,9 @@ package com.datmai.moviereservation.config;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import ch.qos.logback.core.net.SyslogOutputStream;
 import com.datmai.moviereservation.common.security.SecurityUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,10 +28,12 @@ import com.nimbusds.jose.util.Base64;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
+@Slf4j
 public class SecurityConfiguration {
     // Get key from env file
     @Value("${hiendat.jwt.base64-secret}")
     private String jwtKey;
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -111,6 +115,7 @@ public class SecurityConfiguration {
     }
 
     private SecretKey getSecretKey() {
+        log.info("JWT key: {} ",jwtKey);;
         byte[] keyBytes = Base64.from(jwtKey).decode();
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, SecurityUtil.JWT_ALGORITHM.getName());
     }

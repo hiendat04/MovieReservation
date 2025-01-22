@@ -1,6 +1,7 @@
 package com.datmai.moviereservation.domain;
 
 import com.datmai.moviereservation.common.security.SecurityUtil;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -47,6 +48,7 @@ public class Address {
     private Integer addressType;
 
     @OneToOne(mappedBy = "address")
+    @JsonBackReference
     private User user;
 
     @Temporal(TemporalType.TIMESTAMP)
