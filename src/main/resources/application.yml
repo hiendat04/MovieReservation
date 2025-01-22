@@ -20,6 +20,8 @@ spring:
   sendGrid:
     apiKey: ${SENDGRID_API_KEY}
     fromEmail: hiendat04@gmail.com
+    templateId: ${SENDGRID_TEMPLATE_ID}
+    verificationLink: ${SENDGRID_VERIFICATION_LINK}
   profiles:
     active: @spring.profiles.active@
 

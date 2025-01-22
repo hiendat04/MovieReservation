@@ -2,9 +2,11 @@ package com.datmai.moviereservation.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
 
 import com.datmai.moviereservation.domain.User;
 import com.datmai.moviereservation.service.UserService;
@@ -23,20 +25,14 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/users")
 @RequiredArgsConstructor
 @Tag(name = "User Controller")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
@@ -104,6 +100,19 @@ public class UserController {
         // Delete user
         this.userService.deleteUser(id);
         return ResponseEntity.status(HttpStatus.RESET_CONTENT).build();
+    }
+
+    @GetMapping("/verify-email")
+    public void confirmEmail(@RequestParam String secretCode, HttpServletResponse response) throws IOException {
+        log.info("Confirm email: {}", secretCode );
+        try {
+            // TODO check or compare secret code from DB
+
+        } catch (Exception e) {
+            log.error("Confirm email fail, error: {}",e.getMessage());
+        } finally {
+            response.sendRedirect("https://google.com");
+        }
     }
 
     // TODO: Write change/ forgot password API...

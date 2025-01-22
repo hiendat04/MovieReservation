@@ -1,5 +1,6 @@
 package com.datmai.moviereservation.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -22,35 +23,30 @@ import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginati
 import com.datmai.moviereservation.common.dto.response.user.CreateUserRes;
 import com.datmai.moviereservation.common.dto.response.user.UpdateUserRes;
 import com.datmai.moviereservation.common.dto.response.user.UserFetchRes;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j(topic = "USER-SERVICE")
 @RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
-    private final AddressRepository addressRepository;
+    private final EmailService emailService;
 
+    @Transactional(rollbackFor = Exception.class)
     public CreateUserRes createUser(User user) {
         log.info("Creating user {}", user);
-        user.setStatus(UserStatus.NONE);
-        user.setType(UserType.USER);
 
-        // Create user's address
-        Address address = new Address();
-        address.setApartmentNumber(user.getAddress().getApartmentNumber());
-        address.setFloor(user.getAddress().getFloor());
-        address.setBuilding(user.getAddress().getBuilding());
-        address.setStreetNumber(user.getAddress().getStreetNumber());
-        address.setStreet(user.getAddress().getStreet());
-        address.setCity(user.getAddress().getCity());
-        address.setCountry(user.getAddress().getCountry());
-        address.setAddressType(user.getAddress().getAddressType());
-        log.info("Address: {}", address);
-        user.setAddress(address);
 
         // Save user and their address
         User newUser = this.userRepository.save(user);
-        this.addressRepository.save(address);
+        log.info("Created user {}", newUser);
+
+        // Send email confirm, if fails, user need to confirm again (transaction rollback)
+        try {
+            this.emailService.emailVerification(newUser.getEmail(), newUser.getFirstName());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
 
         return this.convertCreateUserDTO(newUser);
     }
