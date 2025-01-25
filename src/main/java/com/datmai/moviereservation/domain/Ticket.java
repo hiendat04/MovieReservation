@@ -21,18 +21,9 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "tickets")
-public class Ticket {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Ticket extends AbstractEntity<Long>{
 
     private Double price;
-
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
 
     // One To One -> Seat
     @OneToOne
@@ -48,20 +39,4 @@ public class Ticket {
     @ManyToOne(optional = true)
     @JoinColumn(name = "user_id")
     private User user;
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
 }

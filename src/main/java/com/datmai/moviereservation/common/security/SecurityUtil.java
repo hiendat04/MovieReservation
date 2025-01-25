@@ -2,13 +2,14 @@ package com.datmai.moviereservation.common.security;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.datmai.moviereservation.common.constant.RoleName;
+import com.datmai.moviereservation.domain.Role;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -55,19 +56,16 @@ public class SecurityUtil {
         Instant now = Instant.now();
         Instant validity = now.plus(this.accessTokenExpiration, ChronoUnit.SECONDS);
 
-        // Hard code permission (for testing)
-        List<String> listAuthority = new ArrayList<String>();
-        listAuthority.add("ROLE_USER_CREATE");
-        listAuthority.add("ROLE_USER_UPDATE");
+        RoleName role = responseLoginDTO.getUser().getRole();
 
-        // Create payload
         JwtClaimsSet claims = JwtClaimsSet.builder()
                 .issuedAt(now)
                 .expiresAt(validity)
                 .subject(email)
                 .claim("user", userToken)
-                .claim("permission", listAuthority)
+                .claim("role", role)
                 .build();
+
 
         // Create header
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
@@ -88,6 +86,8 @@ public class SecurityUtil {
 
         Instant now = Instant.now();
         Instant validity = now.plus(this.refreshTokenExpiration, ChronoUnit.SECONDS);
+
+        RoleName role = responseLoginDTO.getUser().getRole();
         
         // Create payload
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -95,6 +95,7 @@ public class SecurityUtil {
                 .expiresAt(validity)
                 .subject(email)
                 .claim("user", userToken)
+                .claim("role", role)
                 .build();
 
         // Create header

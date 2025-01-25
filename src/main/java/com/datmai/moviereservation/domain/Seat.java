@@ -26,37 +26,12 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "seats")
-public class Seat {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
+public class Seat extends AbstractEntity<Long> {
     @Column(name = "seat_identifier", unique = true, nullable = false)
     private String seatIdentifier;
 
     @Enumerated(EnumType.STRING)
     private SeatStatus status;
-
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
 
     // Many To One -> Screen
     @ManyToOne

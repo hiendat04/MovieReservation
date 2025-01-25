@@ -5,16 +5,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import com.datmai.moviereservation.common.constant.RoleName;
 import com.datmai.moviereservation.common.constant.UserStatus;
 import com.datmai.moviereservation.common.constant.UserType;
 import com.datmai.moviereservation.domain.Address;
+import com.datmai.moviereservation.domain.Role;
 import com.datmai.moviereservation.exception.ExistingException;
 import com.datmai.moviereservation.repository.AddressRepository;
+import com.datmai.moviereservation.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.datmai.moviereservation.domain.User;
@@ -31,13 +37,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final RoleRepository roleRepository;
 
     @Transactional(rollbackFor = Exception.class)
     public CreateUserRes createUser(User user) {
         log.info("Creating user {}", user);
-
+        Role userRole = this.roleRepository.findByName(RoleName.USER).orElse(null);
 
         // Save user and their address
+        log.info("Hashed password {}", user.getPassword());
+
+        user.setRole(userRole);
         User newUser = this.userRepository.save(user);
         log.info("Created user {}", newUser);
 
@@ -186,7 +196,7 @@ public class UserService {
         if (user != null) {
             user.setRefreshToken(token);
             // Update token
-            this.createUser(user);
+            this.userRepository.save(user);
         }
     }
 

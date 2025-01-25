@@ -25,22 +25,13 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "screens")
-public class Screen {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Screen extends AbstractEntity<Long> {
 
     @Enumerated(EnumType.STRING)
     private ScreenName name;
 
     @Enumerated(EnumType.STRING)
     private ScreenFormat format;
-
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
 
     // One To Many -> Schedule
     @OneToMany(mappedBy = "screen", fetch = FetchType.LAZY)
@@ -49,21 +40,4 @@ public class Screen {
     // One To Many -> Seat
     @OneToMany(mappedBy = "screen", fetch = FetchType.LAZY)
     private List<Seat> seats;
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
-
 }

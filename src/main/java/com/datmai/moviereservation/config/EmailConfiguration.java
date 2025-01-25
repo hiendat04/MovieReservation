@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 
 @Slf4j
 @Configuration
-public class EmailConfig {
+public class EmailConfiguration {
 
     @Bean
     public SendGrid sendGrid(@Value("${spring.sendGrid.apiKey}") String apiKey) {

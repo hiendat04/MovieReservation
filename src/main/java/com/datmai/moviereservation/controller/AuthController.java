@@ -2,6 +2,7 @@ package com.datmai.moviereservation.controller;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 
@@ -34,8 +35,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
+@Slf4j(topic = "AUTHENTICATION-CONTROLLER")
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/api/v1/auth")
 @Tag(name = "Authentication Controller")
 @RequiredArgsConstructor
 public class AuthController {
@@ -48,32 +50,36 @@ public class AuthController {
     @Value("${hiendat.jwt.refresh-token-validity-in-seconds}")
     private long refreshTokenExpiration;
 
-    @PostMapping("/auth/login")
+    @PostMapping("/login")
     @ApiMessage("User login")
     public ResponseEntity<ResponseLoginDTO> login(@Valid @RequestBody RequestLoginDTO loginDTO) {
-
+        log.info("Login request: {}", loginDTO.toString());
         // Send username and password to Security
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                 loginDTO.getEmail(), loginDTO.getPassword());
 
-        // Authenticate User => Have to write loadUserByUsername function (in
-        // UserDetailsCustom.java)
+        log.info("Authentication token request: {}", authenticationToken);
+        // Authenticate User => Have to write loadUserByUsername function (in UserDetailsCustom.java file)
         Authentication authentication = this.authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        log.info("Authentication success: {}", authentication);
 
         // Save user information in Security Context Holder for further usage
         SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        log.info("Authenticated user: {}", authentication.getName());
+        log.info("Authorities: {}", authentication.getAuthorities());
 
         ResponseLoginDTO responseLoginDTO = new ResponseLoginDTO();
 
         User currentUser = this.userService.fetchUserByEmail(loginDTO.getEmail());
 
-        if (currentUser != null) {
-            ResponseLoginDTO.UserLogin user = new ResponseLoginDTO.UserLogin(
-                    currentUser.getId(),
-                    currentUser.getEmail(),
-                    currentUser.getUsername());
-            responseLoginDTO.setUser(user);
-        }
+        ResponseLoginDTO.UserLogin user = new ResponseLoginDTO.UserLogin(
+                currentUser.getId(),
+                currentUser.getEmail(),
+                currentUser.getUsername(),
+                currentUser.getRole().getName());
+        responseLoginDTO.setUser(user);
+
 
         // Create access token
         String accessToken = this.securityUtil.createAccessToken(authentication.getName(), responseLoginDTO);
@@ -98,7 +104,7 @@ public class AuthController {
                 .body(responseLoginDTO);
     }
 
-    @GetMapping("/auth/account")
+    @GetMapping("/account")
     @ApiMessage("fetch account")
     public ResponseEntity<ResponseLoginDTO.UserGetAccount> fetchAccount() {
         String email = SecurityUtil.getCurrentUserLogin().isPresent()
@@ -120,7 +126,7 @@ public class AuthController {
     }
 
     // The refresh token is saved as long as user login
-    @GetMapping("/auth/refresh")
+    @GetMapping("/refresh")
     @ApiMessage("Get user by refresh token")
     public ResponseEntity<ResponseLoginDTO> getRefreshToken(
             @CookieValue(name = "refresh_token", defaultValue = "unavailable") String refresh_token // Server get
@@ -150,7 +156,8 @@ public class AuthController {
         ResponseLoginDTO.UserLogin user = new ResponseLoginDTO.UserLogin(
                 currentUser.getId(),
                 currentUser.getEmail(),
-                currentUser.getUsername());
+                currentUser.getUsername(),
+                currentUser.getRole().getName());
 
         responseLoginDTO.setUser(user);
 
@@ -178,7 +185,7 @@ public class AuthController {
 
     }
 
-    @PostMapping("/auth/logout")
+    @PostMapping("/logout")
     @ApiMessage("Logout successfully")
     public ResponseEntity<Void> logout() throws ExistingException {
         // Get the email of current user
@@ -207,7 +214,7 @@ public class AuthController {
                 .body(null);
     }
 
-    @PostMapping("/auth/register")
+    @PostMapping("/register")
     @ApiMessage("Register successfully")
     public ResponseEntity<CreateUserRes> register(@Valid @RequestBody User user) throws ExistingException {
 

@@ -26,36 +26,11 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "schedules")
-public class Schedule {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Schedule extends AbstractEntity<Long> {
 
     @NotNull(message = "Show time cannot be empty")
     @JsonFormat(pattern = "dd/MM/yyyy")
     private LocalDate date;
-
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
 
     // Many To One -> Screen
     @ManyToOne(fetch = FetchType.LAZY)

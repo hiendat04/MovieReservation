@@ -10,9 +10,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -25,6 +27,8 @@ import org.springframework.security.web.SecurityFilterChain;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
+
+import java.util.Collection;
 
 @Configuration
 @EnableMethodSecurity(securedEnabled = true)
@@ -59,17 +63,8 @@ public class SecurityConfiguration {
                         authz -> authz
                                 .requestMatchers(whiteList).permitAll()
                                 .anyRequest().authenticated())
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()) // To activate
-                        // BearerTokenAuthenticationFilter
-                        // and this filter will extract
-                        // the Bearer Token (sent from
-                        // client) automatically to
-                        // start authenticating, we use
-                        // oauth to scale our project in
-                        // the future so
-                        // that server can communicate
-                        // with many services out there
-                        // (Frontend, Server, FB, GG...)
+                .oauth2ResourceServer((oauth2) -> oauth2
+                        .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter()))
                         .authenticationEntryPoint(customAuthenticationEntryPoint))
                 .formLogin(f -> f.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
@@ -81,16 +76,18 @@ public class SecurityConfiguration {
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
         JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
-        grantedAuthoritiesConverter.setAuthorityPrefix("");
-        grantedAuthoritiesConverter.setAuthoritiesClaimName("permission "); // Tell Spring what claim we want to take
-        // from JWT
-        // and then load it into the authentication
-        // to set up authority for the authorization
-        // process further (in
-        // SecurityConfiguration.java file)
+        grantedAuthoritiesConverter.setAuthoritiesClaimName("role");
+        grantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
 
         JwtAuthenticationConverter jwtAuthenticationConverter = new JwtAuthenticationConverter();
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+
+        jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(jwt -> {
+            Collection<GrantedAuthority> authorities = grantedAuthoritiesConverter.convert(jwt);
+            log.debug("Extracted Authorities: {}", authorities);
+            return authorities;
+        });
+
         return jwtAuthenticationConverter;
     }
 
@@ -102,9 +99,11 @@ public class SecurityConfiguration {
                 getSecretKey()).macAlgorithm(SecurityUtil.JWT_ALGORITHM).build(); // Need key to decode
         return token -> {
             try {
-                return jwtDecoder.decode(token);
+                var decodedJwt = jwtDecoder.decode(token);
+                log.debug("Decoded JWT: {}", decodedJwt.getClaims());
+                return decodedJwt;
             } catch (Exception e) {
-                System.out.println(">>> JWT error: " + e.getMessage());
+                log.error("JWT error: {}", e.getMessage());
                 throw e;
             }
         };

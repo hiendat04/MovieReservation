@@ -16,12 +16,7 @@ import java.util.Date;
 @Table(name = "addresses")
 @AllArgsConstructor
 @NoArgsConstructor
-public class Address {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+public class Address extends AbstractEntity<Long> {
 
     @Column(name = "apartment_number")
     private String apartmentNumber;
@@ -51,27 +46,4 @@ public class Address {
     @JsonBackReference
     private User user;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant createdAt;
-    private String createdBy;
-
-    @Temporal(TemporalType.TIMESTAMP)
-    private Instant updatedAt;
-    private String updatedBy;
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
 }

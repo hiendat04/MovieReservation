@@ -23,40 +23,14 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "show_times")
-public class ShowTime {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class ShowTime extends AbstractEntity<Long> {
 
     @NotNull(message = "Show time cannot be empty")
     @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime time; // Only the time
 
-    private Instant createdAt;
-    private String createdBy;
-    private Instant updatedAt;
-    private String updatedBy;
-
     //Many To One -> Schedule
     @ManyToOne
     @JoinColumn(name = "schedule_id")
-    private Schedule schedule; 
-
-    @PrePersist
-    public void handleBeforeCreate() {
-        this.createdBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.createdAt = Instant.now();
-    }
-
-    @PreUpdate
-    public void handleBeforeUpdate() {
-        this.updatedBy = SecurityUtil.getCurrentUserLogin().isPresent()
-                ? SecurityUtil.getCurrentUserLogin().get()
-                : "";
-        this.updatedAt = Instant.now();
-    }
-
+    private Schedule schedule;
 }

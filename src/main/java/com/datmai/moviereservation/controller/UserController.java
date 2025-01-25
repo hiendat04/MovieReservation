@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.datmai.moviereservation.domain.User;
@@ -68,6 +70,7 @@ public class UserController {
 
     @GetMapping
     @ApiMessage("Fetch all users successfully")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SYS_ADMIN')")
     public ResponseEntity<ResultPaginationDTO> fetchAllUsers(
             @Filter Specification<User> spec,
             Pageable pageable) {
@@ -77,6 +80,7 @@ public class UserController {
 
     @GetMapping("/{id}")
     @ApiMessage("Fetch a user successfully")
+    @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserFetchRes> fetchAUser(@PathVariable @Min(1) long id) throws ExistingException {
 
         // Check id user id exist
@@ -91,6 +95,7 @@ public class UserController {
 
     @DeleteMapping("/{id}")
     @ApiMessage("Delete user successfully")
+    @PreAuthorize("hasAnyRole('ADMIN', 'SYS_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable long id) throws ExistingException {
         // Check id user id exist
         if (!this.userService.isIdExist(id)) {
