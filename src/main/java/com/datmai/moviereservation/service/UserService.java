@@ -7,20 +7,15 @@ import java.util.Optional;
 
 import com.datmai.moviereservation.common.constant.RoleName;
 import com.datmai.moviereservation.common.constant.UserStatus;
-import com.datmai.moviereservation.common.constant.UserType;
-import com.datmai.moviereservation.domain.Address;
 import com.datmai.moviereservation.domain.Role;
 import com.datmai.moviereservation.exception.ExistingException;
-import com.datmai.moviereservation.repository.AddressRepository;
+import com.datmai.moviereservation.exception.ResourceNotFoundException;
 import com.datmai.moviereservation.repository.RoleRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Bean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.datmai.moviereservation.domain.User;
@@ -86,6 +81,7 @@ public class UserService {
 
     public CreateUserRes convertCreateUserDTO(User user) {
         return CreateUserRes.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
@@ -125,6 +121,7 @@ public class UserService {
 
     public UpdateUserRes convertUpdateUserDTO(User user) {
         return UpdateUserRes.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
@@ -140,6 +137,7 @@ public class UserService {
 
     public UserFetchRes convertUserFetchDTO(User user) {
         return UserFetchRes.builder()
+                .id(user.getId())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .username(user.getUsername())
@@ -175,15 +173,20 @@ public class UserService {
 
     public UserFetchRes fetchUserById(long id) {
         Optional<User> userOptional = this.userRepository.findById(id);
-        User currentUser = userOptional.orElse(null);
-        if (currentUser == null) {
-            return null;
-        }
+        User currentUser = userOptional.orElseThrow(() -> new ResourceNotFoundException("User with id " + id + " does not exist"));
         return this.convertUserFetchDTO(currentUser);
     }
 
     public void deleteUser(long id) {
-        this.userRepository.deleteById(id);
+        log.info("Deleting user with {} ", id);
+
+        // Get user by id
+        User user = this.userRepository.findById(id).orElse(null);
+        assert user != null;
+        user.setStatus(UserStatus.INACTIVE);
+
+        this.userRepository.save(user);
+        log.info("User with id {} has been deleted.", id);
     }
 
     public User fetchUserByEmail(String email) {

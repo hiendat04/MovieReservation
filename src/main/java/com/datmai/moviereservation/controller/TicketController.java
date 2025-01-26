@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.datmai.moviereservation.domain.Ticket;
 import com.datmai.moviereservation.service.SeatService;
 import com.datmai.moviereservation.service.TicketService;
-import com.datmai.moviereservation.common.constant.SeatStatus;
 import com.datmai.moviereservation.common.dto.response.pagination.ResultPaginationDTO;
 import com.datmai.moviereservation.common.dto.response.ticket.TicketDTO;
 import com.datmai.moviereservation.exception.ExistingException;

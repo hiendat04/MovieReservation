@@ -16,6 +16,7 @@ import java.time.LocalDate;
 @Getter
 @Setter
 public class UserResAbstract implements Serializable {
+    private Long id;
     private String firstName;
     private String lastName;
     private String username;

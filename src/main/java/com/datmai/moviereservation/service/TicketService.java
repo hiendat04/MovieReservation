@@ -1,6 +1,7 @@
 package com.datmai.moviereservation.service;
 
 import com.datmai.moviereservation.exception.ExistingException;
+import com.datmai.moviereservation.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;

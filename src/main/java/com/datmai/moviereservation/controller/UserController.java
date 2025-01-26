@@ -6,7 +6,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -82,12 +81,6 @@ public class UserController {
     @ApiMessage("Fetch a user successfully")
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<UserFetchRes> fetchAUser(@PathVariable @Min(1) long id) throws ExistingException {
-
-        // Check id user id exist
-        if (!this.userService.isIdExist(id)) {
-            throw new ExistingException(
-                    List.of("User with id " + id + " does not exist"));
-        }
 
         UserFetchRes user = this.userService.fetchUserById(id);
         return ResponseEntity.ok().body(user);

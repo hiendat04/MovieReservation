@@ -4,7 +4,7 @@ server:
 hiendat:
   jwt:
     refresh-token-validity-in-seconds: '8640000'
-    base64-secret: ${JWT_BASE64_SECRET}
+    base64-secret: ${JWT_BASE64_SECRET:dummy-JWT_BASE64_SECRET}
     access-token-validity-in-seconds: '8640000'
   upload-file:
     base-uri: file:///C:/Users/Admin/OneDrive/Spring%20REST%20Project/movie_upload/
@@ -18,10 +18,10 @@ spring:
       pageable:
         one-indexed-parameters: true
   sendGrid:
-    apiKey: ${SENDGRID_API_KEY}
+    apiKey: ${SENDGRID_API_KEY:dummy-SENDGRID_API_KEY}
     fromEmail: hiendat04@gmail.com
-    templateId: ${SENDGRID_TEMPLATE_ID}
-    verificationLink: ${SENDGRID_VERIFICATION_LINK}
+    templateId: ${SENDGRID_TEMPLATE_ID:dummy-SENDGRID_TEMPLATE_ID}
+    verificationLink: ${SENDGRID_VERIFICATION_LINK:dummy-SENDGRID_VERIFICATION_LINK}
   profiles:
     active: @spring.profiles.active@
 
