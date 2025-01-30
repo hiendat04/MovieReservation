@@ -8,9 +8,9 @@ spring:
   application:
     name: moviereservation
   datasource:
-    url: jdbc:postgresql://localhost:5432/movies
-    username: postgres
-    password: 123456
+    url: jdbc:postgresql://${DATABASE_HOST:localhost}:${DATABASE_PORT:5432}/movies
+    username: ${DATABASE_USERNAME:postgres}
+    password: ${DATABASE_PASSWORD:123456}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:

@@ -50,7 +50,7 @@ public class SecurityConfiguration {
             CustomAuthenticationEntryPoint customAuthenticationEntryPoint) throws Exception {
 
         String[] whiteList = {
-                "/",
+                "/", "/actuator/**",
                 "/api/v1/auth/login", "/api/v1/auth/refresh", "/api/v1/auth/register",
                 "/storage/**",
                 "/swagger-ui/**", "/swagger-ui.html", "/v3/api-docs/**",
